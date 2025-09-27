@@ -18,7 +18,8 @@ const allowedOrigins = [
   'http://localhost:3000',
   'http://localhost:5173',
   'https://portfolio-backend-4h8x.onrender.com',
-  'https://your-frontend-domain.com' // Replace with your actual frontend domain when deployed
+  'https://your-portfolio-domain.vercel.app', // Will be updated after Vercel deployment
+  'https://*.vercel.app' // Allow all Vercel preview deployments
 ]
 
 // Add environment-specific origins
@@ -32,12 +33,18 @@ app.use(cors({
     // Allow requests with no origin (like mobile apps or curl requests)
     if (!origin) return callback(null, true)
     
+    // Check exact matches first
     if (allowedOrigins.indexOf(origin) !== -1) {
-      callback(null, true)
-    } else {
-      console.log('CORS blocked origin:', origin)
-      callback(new Error('Not allowed by CORS'))
+      return callback(null, true)
     }
+    
+    // Check for Vercel domains (wildcard matching)
+    if (origin && origin.endsWith('.vercel.app')) {
+      return callback(null, true)
+    }
+    
+    console.log('CORS blocked origin:', origin)
+    callback(new Error('Not allowed by CORS'))
   },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
