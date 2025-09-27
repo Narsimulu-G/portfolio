@@ -16,7 +16,7 @@
     }
   ],
   "env": {
-    "VITE_API_BASE": "https://portfolio-backend-4h8x.onrender.com"
+    "VITE_API_BASE": "https://portfolio-g2wj.onrender.com"
   },
   "buildCommand": "npm run build"
 }
