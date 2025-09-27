@@ -15,6 +15,15 @@ export async function apiFetch(path, options = {}) {
   return data
 }
 
+// Helper function to fix image URLs
+export function fixImageUrl(url) {
+  if (!url) return url
+  if (url.startsWith('http://localhost:4000')) {
+    return url.replace('http://localhost:4000', 'https://portfolio-g2wj.onrender.com')
+  }
+  return url
+}
+
 // Certificate API functions
 export async function fetchCertificates() {
   return apiFetch('/api/certificates')
