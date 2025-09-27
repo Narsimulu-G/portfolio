@@ -1,7 +1,7 @@
-// Basic API base resolver: prefer Vite env, else same-origin, else localhost:4000
+// Basic API base resolver: prefer Vite env, else localhost:4000 for development, else production
 export const API_BASE = (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_API_BASE)
-  || (typeof window !== 'undefined' ? `${window.location.origin}` : '')
-  || 'http://localhost:4000'
+  || 'http://localhost:4000'  // Default to local backend for development
+  || 'https://portfolio-backend-4h8x.onrender.com'
 
 export async function apiFetch(path, options = {}) {
   const url = `${API_BASE}${path.startsWith('/') ? path : `/${path}`}`

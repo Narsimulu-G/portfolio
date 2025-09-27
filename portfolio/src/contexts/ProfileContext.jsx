@@ -55,7 +55,7 @@ export function ProfileProvider({ children }) {
       
       // Fix avatarUrl to be a full URL if it's a relative path
       if (finalProfileData?.avatarUrl && finalProfileData.avatarUrl.startsWith('/')) {
-        const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:4000'
+        const baseUrl = import.meta.env.VITE_API_BASE || 'https://portfolio-backend-4h8x.onrender.com'
         finalProfileData.avatarUrl = `${baseUrl}${finalProfileData.avatarUrl}`
         console.log('Fixed avatarUrl:', finalProfileData.avatarUrl)
       }
