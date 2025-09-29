@@ -20,9 +20,9 @@ export default defineConfig({
     host: true,
     proxy: {
       '/api': {
-        target: process.env.VITE_API_BASE || 'https://portfolio-g2wj.onrender.com',
+        target: 'http://localhost:4000',
         changeOrigin: true,
-        secure: true,
+        secure: false,
         configure: (proxy, options) => {
           proxy.on('proxyReq', (proxyReq, req, res) => {
             // Forward cookies
@@ -33,5 +33,8 @@ export default defineConfig({
         },
       },
     },
+  },
+  define: {
+    'import.meta.env.VITE_API_BASE': JSON.stringify('http://localhost:4000')
   },
 })

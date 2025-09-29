@@ -1,6 +1,34 @@
-// Basic API base resolver: prefer Vite env, else production backend
-export const API_BASE = (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_API_BASE)
-  || (typeof window !== 'undefined' && window.location.hostname === 'localhost' ? 'http://localhost:4000' : 'https://portfolio-g2wj.onrender.com')
+// Basic API base resolver: prefer Vite env, else detect environment
+function getApiBase() {
+  // Check for Vite environment variable first
+  if (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_API_BASE) {
+    return import.meta.env.VITE_API_BASE
+  }
+  
+  // Check if we're in development (localhost or 127.0.0.1)
+  if (typeof window !== 'undefined') {
+    const hostname = window.location.hostname
+    const port = window.location.port
+    
+    // If running on localhost with Vite dev server, use relative URLs (proxy)
+    if ((hostname === 'localhost' || hostname === '127.0.0.1') && port === '5173') {
+      return '' // Use relative URLs for Vite proxy
+    }
+    
+    // If running on localhost but not Vite dev server, use direct backend
+    if (hostname === 'localhost' || hostname === '127.0.0.1' || hostname.startsWith('192.168.') || hostname.startsWith('10.')) {
+      return 'http://localhost:4000'
+    }
+  }
+  
+  // Default to production backend
+  return 'https://portfolio-g2wj.onrender.com'
+}
+
+export const API_BASE = getApiBase()
+
+// Log the API base for debugging
+console.log('🌐 API Base URL:', API_BASE || '(using relative URLs for proxy)')
 
 export async function apiFetch(path, options = {}) {
   const url = `${API_BASE}${path.startsWith('/') ? path : `/${path}`}`
