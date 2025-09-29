@@ -8,7 +8,6 @@ import Certificates from './components/Certificates'
 import Contact from './components/Contact'
 import Footer from './components/Footer'
 import AdminPage from '@/pages/admin'
-import AuthTest from './components/AuthTest'
 import { AuthProvider } from './contexts/AuthContext'
 import { ProfileProvider } from './contexts/ProfileContext'
 
@@ -27,9 +26,6 @@ function App() {
                 <AuroraBackground className="h-auto min-h-screen">
                   <Hero />
                 </AuroraBackground>
-                <div className="container mx-auto py-8">
-                  <AuthTest />
-                </div>
                 <About />
                 <Projects />
                 <Skills />
