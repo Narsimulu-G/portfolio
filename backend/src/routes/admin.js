@@ -12,6 +12,15 @@ import { profile as seedProfile } from '../data/seed.js'
 
 const router = Router()
 
+// Handle CORS preflight requests for admin routes
+router.options('*', (req, res) => {
+  res.header('Access-Control-Allow-Origin', req.headers.origin || '*')
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS')
+  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization')
+  res.header('Access-Control-Allow-Credentials', 'true')
+  res.status(200).end()
+})
+
 router.use(requireAuth)
 
 router.get('/summary', async (req, res, next) => {
@@ -138,6 +147,9 @@ router.put('/profile', async (req, res, next) => {
 // About admin CRUD (separate from profile/hero)
 router.get('/about', async (req, res, next) => {
   try {
+    console.log('Admin /about endpoint called')
+    console.log('Request origin:', req.headers.origin)
+    console.log('Request headers:', req.headers)
     const doc = await About.findOne().sort({ updatedAt: -1 })
     if (doc) return res.json(doc)
     // Fallback from seed profile mapping with defaults for lists
@@ -147,7 +159,10 @@ router.get('/about', async (req, res, next) => {
       'Create user-friendly interfaces with HTML, CSS, and Bootstrap',
       'Work with databases and implement CRUD operations'
     ], techStacks: ['React.js','JavaScript','HTML','CSS','Bootstrap','Node.js','Express','SQLite'] })
-  } catch (e) { next(e) }
+  } catch (e) { 
+    console.error('Admin /about error:', e)
+    next(e) 
+  }
 })
 
 router.post('/about', async (req, res, next) => {

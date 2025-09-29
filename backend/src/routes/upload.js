@@ -46,7 +46,9 @@ router.post('/', upload.single('file'), (req, res) => {
     }
 
     // Return the file URL - use full URL for better compatibility
-    const baseUrl = process.env.API_BASE_URL || `http://localhost:${process.env.PORT || 4000}`
+    const baseUrl = process.env.API_BASE_URL || (process.env.NODE_ENV === 'production' 
+      ? 'https://portfolio-j9s6.onrender.com' 
+      : `http://localhost:${process.env.PORT || 4000}`)
     const fileUrl = `${baseUrl}/uploads/${req.file.filename}`
     
     // Also return relative URL for frontend compatibility
