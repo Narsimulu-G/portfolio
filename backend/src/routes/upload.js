@@ -7,6 +7,14 @@ import fs from 'fs'
 
 const router = Router()
 
+// Test route
+router.get('/', (req, res) => {
+  res.json({ 
+    message: 'Upload service is running',
+    cloudinary: cloudinary.config().cloud_name ? 'configured' : 'not configured'
+  })
+})
+
 // Configure Cloudinary
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME || 'dovmtmu7y',
@@ -48,7 +56,14 @@ const upload = multer({
 // Upload endpoint
 router.post('/', upload.single('file'), (req, res) => {
   try {
+    console.log('Upload endpoint called')
+    console.log('Request method:', req.method)
+    console.log('Request headers:', req.headers)
+    console.log('Request body:', req.body)
+    console.log('Request file:', req.file)
+    
     if (!req.file) {
+      console.log('No file uploaded')
       return res.status(400).json({ error: 'No file uploaded' })
     }
 
