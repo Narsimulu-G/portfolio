@@ -13,6 +13,13 @@ import { ProfileProvider } from './contexts/ProfileContext'
 
 function App() {
   const isAdminRoute = typeof window !== 'undefined' && window.location.pathname === '/admin'
+  
+  // Debug logging
+  if (typeof window !== 'undefined') {
+    console.log('Current pathname:', window.location.pathname)
+    console.log('Is admin route:', isAdminRoute)
+  }
+  
   return (
     <AuthProvider>
       <ProfileProvider>
