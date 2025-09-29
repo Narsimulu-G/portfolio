@@ -61,20 +61,40 @@ if (!fs.existsSync(uploadsDir)) {
 // Configure multer storage (Cloudinary or local fallback)
 let storage
 
-try {
-  // Try Cloudinary first
-  storage = new CloudinaryStorage({
-    cloudinary: cloudinary,
-    params: {
-      folder: 'portfolio-uploads',
-      allowed_formats: ['jpg', 'jpeg', 'png', 'gif', 'webp'],
-      transformation: [{ width: 1200, height: 800, crop: 'limit' }]
-    }
-  })
-  console.log('Using Cloudinary storage')
-} catch (error) {
-  console.error('Cloudinary storage failed, using local storage:', error)
-  // Fallback to local storage
+// Check if Cloudinary is properly configured
+const isCloudinaryConfigured = process.env.CLOUDINARY_CLOUD_NAME && 
+                               process.env.CLOUDINARY_API_KEY && 
+                               process.env.CLOUDINARY_API_SECRET
+
+if (isCloudinaryConfigured) {
+  try {
+    // Try Cloudinary first
+    storage = new CloudinaryStorage({
+      cloudinary: cloudinary,
+      params: {
+        folder: 'portfolio-uploads',
+        allowed_formats: ['jpg', 'jpeg', 'png', 'gif', 'webp'],
+        transformation: [{ width: 1200, height: 800, crop: 'limit' }]
+      }
+    })
+    console.log('Using Cloudinary storage')
+  } catch (error) {
+    console.error('Cloudinary storage failed, using local storage:', error)
+    // Fallback to local storage
+    storage = multer.diskStorage({
+      destination: (req, file, cb) => {
+        cb(null, uploadsDir)
+      },
+      filename: (req, file, cb) => {
+        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9)
+        cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname))
+      }
+    })
+    console.log('Using local storage fallback')
+  }
+} else {
+  console.log('Cloudinary not configured, using local storage')
+  // Use local storage directly
   storage = multer.diskStorage({
     destination: (req, file, cb) => {
       cb(null, uploadsDir)
@@ -84,7 +104,7 @@ try {
       cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname))
     }
   })
-  console.log('Using local storage fallback')
+  console.log('Using local storage (Cloudinary not configured)')
 }
 
 let upload
