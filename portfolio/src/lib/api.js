@@ -7,7 +7,9 @@ export async function apiFetch(path, options = {}) {
   const headers = new Headers(options.headers || {})
   
   // Ensure proper headers for CORS
-  headers.set('Content-Type', 'application/json')
+  if (!headers.has('Content-Type')) {
+    headers.set('Content-Type', 'application/json')
+  }
   headers.set('Accept', 'application/json')
   
   // Use cookie-based auth; always send credentials
@@ -19,14 +21,23 @@ export async function apiFetch(path, options = {}) {
     cache: 'no-cache'
   }
   
-  const res = await fetch(url, fetchOptions)
-  const data = await res.json().catch(() => ({}))
-  
-  if (!res.ok) {
-    const message = (data && (data.error || data.message)) || `Request failed: ${res.status}`
-    throw new Error(message)
+  try {
+    const res = await fetch(url, fetchOptions)
+    const data = await res.json().catch(() => ({}))
+    
+    if (!res.ok) {
+      const message = (data && (data.error || data.message)) || `Request failed: ${res.status}`
+      console.error(`API Error ${res.status}:`, message, 'URL:', url)
+      throw new Error(message)
+    }
+    return data
+  } catch (error) {
+    if (error.name === 'TypeError' && error.message.includes('fetch')) {
+      console.error('Network error:', error.message, 'URL:', url)
+      throw new Error('Network error: Unable to connect to server')
+    }
+    throw error
   }
-  return data
 }
 
 // Helper function to fix image URLs

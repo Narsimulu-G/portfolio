@@ -27,6 +27,7 @@ export function AuthProvider({ children }) {
       setUser(response.user)
       setIsAuthenticated(true)
     } catch (error) {
+      console.log('Auth check failed:', error.message)
       setIsAuthenticated(false)
       setUser(null)
     } finally {
@@ -36,14 +37,17 @@ export function AuthProvider({ children }) {
 
   const login = async (email, password) => {
     try {
+      console.log('Attempting login for:', email)
       await apiFetch('/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password })
       })
+      console.log('Login successful, checking auth status')
       await checkAuthStatus()
       return { success: true }
     } catch (error) {
+      console.error('Login failed:', error.message)
       return { success: false, error: error.message }
     }
   }

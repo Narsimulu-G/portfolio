@@ -58,7 +58,8 @@ router.post('/login', async (req, res) => {
       httpOnly: true,
       sameSite: isProd ? 'none' : 'lax',
       secure: isProd,
-      maxAge: 2 * 60 * 60 * 1000
+      maxAge: 2 * 60 * 60 * 1000, // 2 hours
+      path: '/'
     })
     
     res.json({ success: true })
@@ -70,7 +71,12 @@ router.post('/login', async (req, res) => {
 
 router.post('/logout', (req, res) => {
   const isProd = process.env.NODE_ENV === 'production'
-  res.clearCookie('token', { httpOnly: true, sameSite: isProd ? 'none' : 'lax', secure: isProd })
+  res.clearCookie('token', { 
+    httpOnly: true, 
+    sameSite: isProd ? 'none' : 'lax', 
+    secure: isProd,
+    path: '/'
+  })
   res.json({ success: true })
 })
 
