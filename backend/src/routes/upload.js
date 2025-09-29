@@ -1,25 +1,32 @@
 import { Router } from 'express'
 import multer from 'multer'
+import { v2 as cloudinary } from 'cloudinary'
+import { CloudinaryStorage } from 'multer-storage-cloudinary'
 import path from 'path'
 import fs from 'fs'
 
 const router = Router()
 
-// Create uploads directory if it doesn't exist
+// Configure Cloudinary
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME || 'dovmtmu7y',
+  api_key: process.env.CLOUDINARY_API_KEY || 'your_api_key',
+  api_secret: process.env.CLOUDINARY_API_SECRET || 'your_api_secret'
+})
+
+// Create uploads directory if it doesn't exist (fallback)
 const uploadsDir = path.join(process.cwd(), 'uploads')
 if (!fs.existsSync(uploadsDir)) {
   fs.mkdirSync(uploadsDir, { recursive: true })
 }
 
-// Configure multer for file uploads
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, uploadsDir)
-  },
-  filename: (req, file, cb) => {
-    // Generate unique filename with timestamp
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9)
-    cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname))
+// Configure multer for Cloudinary uploads
+const storage = new CloudinaryStorage({
+  cloudinary: cloudinary,
+  params: {
+    folder: 'portfolio-uploads',
+    allowed_formats: ['jpg', 'jpeg', 'png', 'gif', 'webp'],
+    transformation: [{ width: 1200, height: 800, crop: 'limit' }]
   }
 })
 
@@ -45,29 +52,28 @@ router.post('/', upload.single('file'), (req, res) => {
       return res.status(400).json({ error: 'No file uploaded' })
     }
 
-    // Return the file URL - use full URL for better compatibility
-    const baseUrl = process.env.API_BASE_URL || (process.env.NODE_ENV === 'production' 
-      ? 'https://portfolio-j9s6.onrender.com' 
-      : `http://localhost:${process.env.PORT || 4000}`)
-    const fileUrl = `${baseUrl}/uploads/${req.file.filename}`
+    // Cloudinary returns the secure URL directly
+    const fileUrl = req.file.path
+    const filename = req.file.filename
+    const originalName = req.file.originalname
+    const size = req.file.size
     
-    // Also return relative URL for frontend compatibility
-    const relativeUrl = `/uploads/${req.file.filename}`
-    
-    console.log('File uploaded successfully:', {
-      filename: req.file.filename,
-      originalName: req.file.originalname,
-      size: req.file.size,
-      url: fileUrl
+    console.log('File uploaded successfully to Cloudinary:', {
+      filename: filename,
+      originalName: originalName,
+      size: size,
+      url: fileUrl,
+      cloudinaryId: req.file.public_id
     })
     
     res.json({ 
       success: true, 
       url: fileUrl,
-      relativeUrl: relativeUrl,
-      filename: req.file.filename,
-      originalName: req.file.originalname,
-      size: req.file.size
+      relativeUrl: fileUrl, // Cloudinary URLs are already full URLs
+      filename: filename,
+      originalName: originalName,
+      size: size,
+      cloudinaryId: req.file.public_id
     })
   } catch (error) {
     console.error('Upload error:', error)
@@ -75,7 +81,7 @@ router.post('/', upload.single('file'), (req, res) => {
   }
 })
 
-// Serve uploaded files
+// Serve uploaded files (fallback for local files)
 router.get('/:filename', (req, res) => {
   const filename = req.params.filename
   const filePath = path.join(uploadsDir, filename)
@@ -88,6 +94,15 @@ router.get('/:filename', (req, res) => {
   // Set appropriate headers
   res.setHeader('Content-Type', 'image/jpeg') // Default to JPEG, could be improved
   res.sendFile(filePath)
+})
+
+// Health check endpoint
+router.get('/health', (req, res) => {
+  res.json({ 
+    status: 'ok', 
+    cloudinary: cloudinary.config().cloud_name ? 'configured' : 'not configured',
+    uploads: fs.existsSync(uploadsDir) ? 'available' : 'not available'
+  })
 })
 
 export default router
