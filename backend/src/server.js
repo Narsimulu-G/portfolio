@@ -3,6 +3,7 @@ import cors from 'cors'
 import morgan from 'morgan'
 import dotenv from 'dotenv'
 import cookieParser from 'cookie-parser'
+import mongoose from 'mongoose'
 import { connectToDatabase } from './config/db.js'
 import apiRouter from './routes/index.js'
 import authRouter from './routes/auth.js'
@@ -118,6 +119,14 @@ async function startServerWithDbRetry() {
     try {
       attempt += 1
       console.log(`[DB] Connecting (attempt ${attempt})...`)
+      
+      // Check if we're already connected before attempting to connect
+      if (mongoose.connection.readyState === 1) {
+        console.log('[DB] Already connected to MongoDB')
+        console.log(`API running on http://localhost:${PORT}`)
+        return
+      }
+      
       await connectToDatabase(MONGODB_URI)
       console.log('[DB] Connected')
       console.log(`API running on http://localhost:${PORT}`)
