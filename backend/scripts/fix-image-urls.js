@@ -54,18 +54,9 @@ const fallbackImages = {
   project: 'https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?q=80&w=600&h=400&auto=format&fit=crop'
 }
 
-// Better project images from Cloudinary
+// Working project images - mix of Cloudinary (working) and Unsplash
 const projectImages = [
-  'https://res.cloudinary.com/dovmtmu7y/image/upload/v1758257912/ecommerce_demo.jpg',
-  'https://res.cloudinary.com/dovmtmu7y/image/upload/v1758257912/portfolio_demo.jpg',
-  'https://res.cloudinary.com/dovmtmu7y/image/upload/v1758257912/weather_demo.jpg',
-  'https://res.cloudinary.com/dovmtmu7y/image/upload/v1758257912/task_demo.jpg',
-  'https://res.cloudinary.com/dovmtmu7y/image/upload/v1758257912/webapp_demo.jpg',
-  'https://res.cloudinary.com/dovmtmu7y/image/upload/v1758257912/mobile_demo.jpg'
-]
-
-// Fallback to Unsplash if Cloudinary images don't exist
-const unsplashImages = [
+  'https://res.cloudinary.com/dovmtmu7y/image/upload/v1758257912/badri_ekxgwe.jpg', // Use working Cloudinary image
   'https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?q=80&w=600&h=400&auto=format&fit=crop',
   'https://images.unsplash.com/photo-1460925895917-afdab827c52f?q=80&w=600&h=400&auto=format&fit=crop',
   'https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?q=80&w=600&h=400&auto=format&fit=crop',
@@ -117,12 +108,17 @@ async function fixImageUrls() {
       console.log(`Current imageUrl: ${project.imageUrl}`)
       console.log(`Current image: ${project.image}`)
       
-      // Check if current URLs are broken or need Cloudinary update
+      // Check if current URLs are broken or need update
       const isImageUrlBroken = project.imageUrl && (
         project.imageUrl.includes('localhost:4000') ||
         project.imageUrl.includes('file-1759158253719-752310476.png') ||
         project.imageUrl.includes('portfolio-j9s6.onrender.com/uploads/') ||
-        project.imageUrl.includes('images.unsplash.com') || // Force update Unsplash to Cloudinary
+        project.imageUrl.includes('weather_demo.jpg') || // Force update non-existent Cloudinary images
+        project.imageUrl.includes('ecommerce_demo.jpg') ||
+        project.imageUrl.includes('task_demo.jpg') ||
+        project.imageUrl.includes('mobile_demo.jpg') ||
+        project.imageUrl.includes('portfolio_demo.jpg') ||
+        project.imageUrl.includes('webapp_demo.jpg') ||
         !project.imageUrl.startsWith('http')
       )
       
@@ -130,7 +126,12 @@ async function fixImageUrls() {
         project.image.includes('localhost:4000') ||
         project.image.includes('file-1759158253719-752310476.png') ||
         project.image.includes('portfolio-j9s6.onrender.com/uploads/') ||
-        project.image.includes('images.unsplash.com') || // Force update Unsplash to Cloudinary
+        project.image.includes('weather_demo.jpg') || // Force update non-existent Cloudinary images
+        project.image.includes('ecommerce_demo.jpg') ||
+        project.image.includes('task_demo.jpg') ||
+        project.image.includes('mobile_demo.jpg') ||
+        project.image.includes('portfolio_demo.jpg') ||
+        project.image.includes('webapp_demo.jpg') ||
         !project.image.startsWith('http')
       )
       
