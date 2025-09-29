@@ -40,17 +40,21 @@ export function AuthProvider({ children }) {
   const login = async (email, password) => {
     try {
       console.log('Attempting login for:', email)
+      console.log('Current cookies before login:', document.cookie)
+      
       const response = await apiFetch('/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password })
       })
       console.log('Login response:', response)
+      console.log('Cookies after login:', document.cookie)
       console.log('Login successful, waiting before checking auth status...')
       
       // Add a small delay to ensure cookie is set
-      await new Promise(resolve => setTimeout(resolve, 100))
+      await new Promise(resolve => setTimeout(resolve, 500))
       
+      console.log('Cookies before auth check:', document.cookie)
       await checkAuthStatus()
       return { success: true }
     } catch (error) {

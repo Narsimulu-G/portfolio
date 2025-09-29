@@ -54,14 +54,19 @@ router.post('/login', async (req, res) => {
     )
     
     const isProd = process.env.NODE_ENV === 'production'
+    console.log('Setting cookie for production:', isProd)
+    console.log('Request origin:', req.headers.origin)
+    
     res.cookie('token', token, {
       httpOnly: true,
       sameSite: isProd ? 'none' : 'lax',
       secure: isProd,
       maxAge: 2 * 60 * 60 * 1000, // 2 hours
       path: '/',
-      domain: isProd ? undefined : undefined // Let browser handle domain in production
+      domain: undefined // Don't set domain to allow cross-origin cookies
     })
+    
+    console.log('Cookie set successfully')
     
     res.json({ success: true })
   } catch (error) {
