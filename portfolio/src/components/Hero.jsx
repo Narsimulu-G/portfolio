@@ -203,6 +203,7 @@ function Hero() {
                       onError={(e) => {
                         console.log('Profile image failed to load, using fallback')
                         e.target.src = "https://res.cloudinary.com/dovmtmu7y/image/upload/v1758257912/badri_ekxgwe.jpg"
+                        e.target.onerror = null // Prevent infinite loop
                       }}
                     />
                   ) : (

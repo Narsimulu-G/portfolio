@@ -29,13 +29,13 @@ router.post('/seed-projects', async (req, res, next) => {
       {
         title: 'Food Munch',
         description: 'Responsive food browsing website with product videos. Built using HTML, CSS, and Bootstrap.',
-        imageUrl: 'https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?q=80&w=1200&auto=format&fit=crop',
+        imageUrl: 'https://via.placeholder.com/600x400/4F46E5/FFFFFF?text=Food+Munch',
         liveUrl: 'http://narsimulu79.ccbp.tech',
         githubUrl: 'https://github.com/Narsimulu-G/food-munch',
         technologies: ['HTML', 'CSS', 'Bootstrap'],
         featured: true,
         // Keep old fields for backward compatibility
-        image: 'https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?q=80&w=1200&auto=format&fit=crop',
+        image: 'https://via.placeholder.com/600x400/4F46E5/FFFFFF?text=Food+Munch',
         tags: ['HTML', 'CSS', 'Bootstrap'],
         demoUrl: 'http://narsimulu79.ccbp.tech',
         icon: '🍕',
@@ -44,13 +44,13 @@ router.post('/seed-projects', async (req, res, next) => {
       {
         title: 'Weather App',
         description: 'Real-time weather application with location-based forecasts. Built with React and OpenWeather API.',
-        imageUrl: 'https://images.unsplash.com/photo-1504608524841-42fe6f032b4b?q=80&w=1200&auto=format&fit=crop',
+        imageUrl: 'https://via.placeholder.com/600x400/10B981/FFFFFF?text=Weather+App',
         liveUrl: 'https://weather-app-demo.com',
         githubUrl: 'https://github.com/Narsimulu-G/weather-app',
         technologies: ['React', 'JavaScript', 'API'],
         featured: true,
         // Keep old fields for backward compatibility
-        image: 'https://images.unsplash.com/photo-1504608524841-42fe6f032b4b?q=80&w=1200&auto=format&fit=crop',
+        image: 'https://via.placeholder.com/600x400/10B981/FFFFFF?text=Weather+App',
         tags: ['React', 'JavaScript', 'API'],
         demoUrl: 'https://weather-app-demo.com',
         icon: '🌤️',
@@ -59,13 +59,13 @@ router.post('/seed-projects', async (req, res, next) => {
       {
         title: 'Task Manager',
         description: 'Full-stack task management application with user authentication and real-time updates.',
-        imageUrl: 'https://images.unsplash.com/photo-1611224923853-80b023f02d71?q=80&w=1200&auto=format&fit=crop',
+        imageUrl: 'https://via.placeholder.com/600x400/F59E0B/FFFFFF?text=Task+Manager',
         liveUrl: 'https://task-manager-demo.com',
         githubUrl: 'https://github.com/Narsimulu-G/task-manager',
         technologies: ['React', 'Node.js', 'MongoDB'],
         featured: false,
         // Keep old fields for backward compatibility
-        image: 'https://images.unsplash.com/photo-1611224923853-80b023f02d71?q=80&w=1200&auto=format&fit=crop',
+        image: 'https://via.placeholder.com/600x400/F59E0B/FFFFFF?text=Task+Manager',
         tags: ['React', 'Node.js', 'MongoDB'],
         demoUrl: 'https://task-manager-demo.com',
         icon: '✅',
@@ -74,13 +74,13 @@ router.post('/seed-projects', async (req, res, next) => {
       {
         title: 'E-commerce Store',
         description: 'Complete e-commerce solution with payment integration, inventory management, and admin dashboard.',
-        imageUrl: 'https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?q=80&w=1200&auto=format&fit=crop',
+        imageUrl: 'https://via.placeholder.com/600x400/EF4444/FFFFFF?text=E-commerce',
         liveUrl: 'https://ecommerce-demo.com',
         githubUrl: 'https://github.com/Narsimulu-G/ecommerce-store',
         technologies: ['React', 'Express', 'Stripe', 'PostgreSQL'],
         featured: true,
         // Keep old fields for backward compatibility
-        image: 'https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?q=80&w=1200&auto=format&fit=crop',
+        image: 'https://via.placeholder.com/600x400/EF4444/FFFFFF?text=E-commerce',
         tags: ['React', 'Express', 'Stripe', 'PostgreSQL'],
         demoUrl: 'https://ecommerce-demo.com',
         icon: '🛒',
@@ -124,7 +124,7 @@ router.get('/projects', async (req, res, next) => {
         {
           title: 'Food Munch',
           description: 'Responsive food browsing website with product videos. Built using HTML, CSS, and Bootstrap.',
-          image: 'https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?q=80&w=1200&auto=format&fit=crop',
+          image: 'https://via.placeholder.com/600x400/4F46E5/FFFFFF?text=Food+Munch',
           tags: ['HTML', 'CSS', 'Bootstrap'],
           demoUrl: 'http://narsimulu79.ccbp.tech',
           githubUrl: 'https://github.com/yourusername/food-munch',
@@ -203,7 +203,17 @@ router.get('/resume', async (req, res, next) => {
   try {
     const resume = await Resume.findOne({ isActive: true }).sort({ createdAt: -1 })
     if (!resume) {
-      return res.status(404).json({ error: 'No resume available' })
+      // Return a fallback resume object instead of 404
+      return res.json({
+        title: 'Resume',
+        fileName: 'resume.pdf',
+        fileUrl: '#',
+        fileSize: 0,
+        mimeType: 'application/pdf',
+        isActive: true,
+        downloadCount: 0,
+        message: 'Resume not yet uploaded'
+      })
     }
     res.json(resume)
   } catch (e) { next(e) }

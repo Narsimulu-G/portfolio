@@ -53,6 +53,11 @@ export function ProfileProvider({ children }) {
         avatarUrl: 'https://res.cloudinary.com/dovmtmu7y/image/upload/v1758257912/badri_ekxgwe.jpg'
       }
       
+      // Ensure avatarUrl is always set
+      if (!finalProfileData.avatarUrl) {
+        finalProfileData.avatarUrl = 'https://res.cloudinary.com/dovmtmu7y/image/upload/v1758257912/badri_ekxgwe.jpg'
+      }
+      
       // Fix avatarUrl to be a full URL if it's a relative path
       if (finalProfileData?.avatarUrl && finalProfileData.avatarUrl.startsWith('/')) {
         const baseUrl = import.meta.env.VITE_API_BASE || 'https://portfolio-j9s6.onrender.com'
@@ -66,17 +71,21 @@ export function ProfileProvider({ children }) {
         console.log('Fixed avatarUrl with utility:', finalProfileData.avatarUrl)
       }
       
+      console.log('Final profile data before setting:', finalProfileData)
+      
       setProfile(finalProfileData)
       setResume(resumeData)
     } catch (err) {
       console.error('Failed to fetch profile data:', err)
       setError(err.message)
       // Set fallback profile data
-      setProfile({
+      const fallbackProfile = {
         name: 'Narsimulu G',
         bio: 'Full-stack developer passionate about building responsive web applications.',
         avatarUrl: 'https://res.cloudinary.com/dovmtmu7y/image/upload/v1758257912/badri_ekxgwe.jpg'
-      })
+      }
+      console.log('Setting fallback profile:', fallbackProfile)
+      setProfile(fallbackProfile)
     } finally {
       setLoading(false)
     }
@@ -96,11 +105,13 @@ export function ProfileProvider({ children }) {
     const timer = setTimeout(() => {
       if (loading && !profile) {
         console.log('ProfileContext: Setting fallback profile due to timeout')
-        setProfile({
+        const timeoutProfile = {
           name: 'Narsimulu G',
           bio: 'Full-stack developer passionate about building responsive web applications.',
           avatarUrl: 'https://res.cloudinary.com/dovmtmu7y/image/upload/v1758257912/badri_ekxgwe.jpg'
-        })
+        }
+        console.log('Setting timeout fallback profile:', timeoutProfile)
+        setProfile(timeoutProfile)
         setLoading(false)
       }
     }, 8000)

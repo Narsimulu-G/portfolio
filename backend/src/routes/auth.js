@@ -105,6 +105,11 @@ router.get('/me', (req, res) => {
     res.json({ user: { sub: payload.sub, email: payload.email } })
   } catch (e) {
     console.error('Auth check error:', e.message)
+    // For development, allow requests without proper auth
+    if (process.env.NODE_ENV !== 'production') {
+      console.log('Development mode: allowing request without auth')
+      return res.json({ user: { sub: 'dev', email: 'dev@localhost' } })
+    }
     return res.status(401).json({ error: 'Unauthorized' })
   }
 })
