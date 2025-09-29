@@ -22,7 +22,7 @@ function getApiBase() {
   }
   
   // Default to production backend
-  return 'https://portfolio-backend-4h8x.onrender.com'
+  return 'https://portfolio-j9s6.onrender.com'
 }
 
 export const API_BASE = getApiBase()
@@ -74,12 +74,17 @@ export function fixImageUrl(url) {
   
   // Fix localhost URLs
   if (url.includes('localhost:4000')) {
-    return url.replace('http://localhost:4000', 'https://portfolio-backend-4h8x.onrender.com')
+    return url.replace('http://localhost:4000', 'https://portfolio-j9s6.onrender.com')
   }
   
   // Fix old backend URLs
   if (url.includes('portfolio-g2wj.onrender.com')) {
-    return url.replace('https://portfolio-g2wj.onrender.com', 'https://portfolio-backend-4h8x.onrender.com')
+    return url.replace('https://portfolio-g2wj.onrender.com', 'https://portfolio-j9s6.onrender.com')
+  }
+  
+  // Fix old backend URLs
+  if (url.includes('portfolio-backend-4h8x.onrender.com')) {
+    return url.replace('https://portfolio-backend-4h8x.onrender.com', 'https://portfolio-j9s6.onrender.com')
   }
   
   return url

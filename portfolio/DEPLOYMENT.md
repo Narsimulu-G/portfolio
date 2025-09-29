@@ -32,7 +32,7 @@ git push -u origin main
 
 2. **Configure Environment Variables**:
    - In Vercel project settings, go to "Environment Variables"
-   - Add: `VITE_API_BASE` = `https://portfolio-backend-4h8x.onrender.com`
+   - Add: `VITE_API_BASE` = `https://portfolio-j9s6.onrender.com`
 
 3. **Deploy**:
    - Vercel will automatically detect it's a Vite project
@@ -79,5 +79,5 @@ Make sure your backend is deployed on Render with:
 ### Environment Variables Required:
 
 - `VITE_API_BASE`: Your backend API URL
-  - Production: `https://portfolio-backend-4h8x.onrender.com`
+  - Production: `https://portfolio-j9s6.onrender.com`
   - Development: `http://localhost:4000`
