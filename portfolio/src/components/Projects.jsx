@@ -67,7 +67,7 @@ function Projects() {
             console.log('liveUrl:', project.liveUrl)
             console.log('demoUrl:', project.demoUrl)
             
-            // Fix image URLs to use production backend
+            // Fix image URLs to use production backend and ensure Cloudinary URLs
             const fixedImage = fixImageUrl(project.imageUrl || project.image)
             
             const mapped = {

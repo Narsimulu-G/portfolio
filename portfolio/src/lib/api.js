@@ -34,8 +34,8 @@ export async function apiFetch(path, options = {}) {
   const url = `${API_BASE}${path.startsWith('/') ? path : `/${path}`}`
   const headers = new Headers(options.headers || {})
   
-  // Only set Content-Type for non-FormData requests
-  if (!headers.has('Content-Type') && !(options.body instanceof FormData)) {
+  // Ensure proper headers for CORS
+  if (!headers.has('Content-Type')) {
     headers.set('Content-Type', 'application/json')
   }
   headers.set('Accept', 'application/json')
@@ -78,26 +78,38 @@ export async function apiFetch(path, options = {}) {
 export function fixImageUrl(url) {
   if (!url) return url
   
-  // Fix localhost URLs (both http and https)
-  if (url.includes('localhost:4000')) {
-    return url.replace(/https?:\/\/localhost:4000/, 'https://portfolio-j9s6.onrender.com')
+  console.log('Fixing image URL:', url)
+  
+  // Fix relative paths (starting with /)
+  if (url.startsWith('/')) {
+    const baseUrl = import.meta.env.VITE_API_BASE || 'https://portfolio-j9s6.onrender.com'
+    const fixedUrl = `${baseUrl}${url}`
+    console.log('Fixed relative path:', fixedUrl)
+    return fixedUrl
   }
   
-  // Fix any localhost URLs
-  if (url.includes('localhost')) {
-    return url.replace(/https?:\/\/localhost(:\d+)?/, 'https://portfolio-j9s6.onrender.com')
+  // Fix localhost URLs
+  if (url.includes('localhost:4000')) {
+    const fixedUrl = url.replace('http://localhost:4000', 'https://portfolio-j9s6.onrender.com')
+    console.log('Fixed localhost URL:', fixedUrl)
+    return fixedUrl
   }
   
   // Fix old backend URLs
   if (url.includes('portfolio-g2wj.onrender.com')) {
-    return url.replace('https://portfolio-g2wj.onrender.com', 'https://portfolio-j9s6.onrender.com')
+    const fixedUrl = url.replace('https://portfolio-g2wj.onrender.com', 'https://portfolio-j9s6.onrender.com')
+    console.log('Fixed old backend URL:', fixedUrl)
+    return fixedUrl
   }
   
   // Fix old backend URLs
   if (url.includes('portfolio-backend-4h8x.onrender.com')) {
-    return url.replace('https://portfolio-backend-4h8x.onrender.com', 'https://portfolio-j9s6.onrender.com')
+    const fixedUrl = url.replace('https://portfolio-backend-4h8x.onrender.com', 'https://portfolio-j9s6.onrender.com')
+    console.log('Fixed old backend URL:', fixedUrl)
+    return fixedUrl
   }
   
+  console.log('No fixing needed for URL:', url)
   return url
 }
 

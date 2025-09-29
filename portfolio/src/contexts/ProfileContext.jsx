@@ -58,14 +58,7 @@ export function ProfileProvider({ children }) {
         finalProfileData.avatarUrl = 'https://res.cloudinary.com/dovmtmu7y/image/upload/v1758257912/badri_ekxgwe.jpg'
       }
       
-      // Fix avatarUrl to be a full URL if it's a relative path
-      if (finalProfileData?.avatarUrl && finalProfileData.avatarUrl.startsWith('/')) {
-        const baseUrl = import.meta.env.VITE_API_BASE || 'https://portfolio-j9s6.onrender.com'
-        finalProfileData.avatarUrl = `${baseUrl}${finalProfileData.avatarUrl}`
-        console.log('Fixed avatarUrl:', finalProfileData.avatarUrl)
-      }
-      
-      // Fix any problematic URLs (localhost, old backend URLs)
+      // Fix any problematic URLs (localhost, old backend URLs, relative paths)
       if (finalProfileData?.avatarUrl) {
         finalProfileData.avatarUrl = fixImageUrl(finalProfileData.avatarUrl)
         console.log('Fixed avatarUrl with utility:', finalProfileData.avatarUrl)

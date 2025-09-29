@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { apiFetch } from '@/lib/api'
+import { apiFetch, fixImageUrl } from '@/lib/api'
 
 function About() {
   const [profile, setProfile] = useState(null)
@@ -19,7 +19,7 @@ function About() {
         const mapped = aboutRes ? {
           name: aboutRes.title || 'About Me',
           bio: aboutRes.bio || '',
-          avatarUrl: aboutRes.imageUrl || ''
+          avatarUrl: fixImageUrl(aboutRes.imageUrl) || ''
         } : null
         setProfile(mapped)
         setSkills(Array.isArray(aboutRes?.techStacks) ? aboutRes.techStacks : [])
@@ -34,7 +34,7 @@ function About() {
 
   const displayName = profile?.name || 'About Me'
   const bio = profile?.bio || "I specialize in building responsive web applications using React.js and modern web technologies. I'm passionate about creating user-friendly interfaces and solving complex problems through code."
-  const avatarUrl = profile?.avatarUrl || 'https://images.unsplash.com/photo-1511367461989-f85a21fda167?q=80&w=1200&auto=format&fit=crop'
+  const avatarUrl = profile?.avatarUrl || 'https://res.cloudinary.com/dovmtmu7y/image/upload/v1758257912/badri_ekxgwe.jpg'
   const [whatIDo, setWhatIDo] = useState([])
   return (
     <section id="about" className="min-h-screen py-12 sm:py-16 lg:py-20 bg-gradient-to-br from-indigo-50 via-white to-blue-50">

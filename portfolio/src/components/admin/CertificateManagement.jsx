@@ -13,34 +13,12 @@ function CertificateForm({ certificate, onSave, onCancel, isOpen }) {
   const [isDragOver, setIsDragOver] = useState(false)
   const [imagePreview, setImagePreview] = useState('')
 
-  // Helper function to convert date format
-  const convertDateForInput = (dateString) => {
-    if (!dateString) return ''
-    
-    // If it's already in yyyy-MM-dd format, return as is
-    if (/^\d{4}-\d{2}-\d{2}$/.test(dateString)) {
-      return dateString
-    }
-    
-    // Try to parse common date formats
-    try {
-      const date = new Date(dateString)
-      if (!isNaN(date.getTime())) {
-        return date.toISOString().split('T')[0] // Convert to yyyy-MM-dd
-      }
-    } catch (error) {
-      console.warn('Could not parse date:', dateString)
-    }
-    
-    return ''
-  }
-
   useEffect(() => {
     if (certificate) {
       setFormData({
         title: certificate.title || '',
         issuer: certificate.issuer || '',
-        date: convertDateForInput(certificate.date),
+        date: certificate.date || '',
         image: certificate.image || '',
         isActive: certificate.isActive !== undefined ? certificate.isActive : true,
         order: certificate.order || 0
