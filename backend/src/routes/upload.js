@@ -24,6 +24,15 @@ router.post('/test', (req, res) => {
   })
 })
 
+// Simple POST route without multer
+router.post('/simple', (req, res) => {
+  res.json({ 
+    message: 'Simple POST successful',
+    method: req.method,
+    headers: req.headers
+  })
+})
+
 // Debug all requests
 router.use((req, res, next) => {
   console.log(`Upload router: ${req.method} ${req.path}`)
@@ -78,20 +87,35 @@ try {
   console.log('Using local storage fallback')
 }
 
-const upload = multer({
-  storage: storage,
-  limits: {
-    fileSize: 5 * 1024 * 1024 // 5MB limit
-  },
-  fileFilter: (req, file, cb) => {
-    // Check if file is an image
-    if (file.mimetype.startsWith('image/')) {
-      cb(null, true)
-    } else {
-      cb(new Error('Only image files are allowed!'), false)
+let upload
+
+try {
+  upload = multer({
+    storage: storage,
+    limits: {
+      fileSize: 5 * 1024 * 1024 // 5MB limit
+    },
+    fileFilter: (req, file, cb) => {
+      // Check if file is an image
+      if (file.mimetype.startsWith('image/')) {
+        cb(null, true)
+      } else {
+        cb(new Error('Only image files are allowed!'), false)
+      }
     }
-  }
-})
+  })
+  console.log('Multer configured successfully')
+} catch (error) {
+  console.error('Multer configuration error:', error)
+  // Create a basic multer instance as fallback
+  upload = multer({
+    storage: multer.memoryStorage(),
+    limits: {
+      fileSize: 5 * 1024 * 1024
+    }
+  })
+  console.log('Using fallback multer configuration')
+}
 
 // Upload endpoint
 router.post('/', upload.single('file'), (req, res) => {
