@@ -15,6 +15,22 @@ router.get('/', (req, res) => {
   })
 })
 
+// Test POST route
+router.post('/test', (req, res) => {
+  res.json({ 
+    message: 'POST test successful',
+    method: req.method,
+    body: req.body
+  })
+})
+
+// Debug all requests
+router.use((req, res, next) => {
+  console.log(`Upload router: ${req.method} ${req.path}`)
+  console.log('Headers:', req.headers)
+  next()
+})
+
 // Configure Cloudinary
 try {
   cloudinary.config({
