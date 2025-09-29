@@ -55,18 +55,31 @@ router.post('/login', async (req, res) => {
     
     const isProd = process.env.NODE_ENV === 'production'
     const isCrossOrigin = req.headers.origin && !req.headers.origin.includes('localhost')
+    const isHttps = req.secure || req.headers['x-forwarded-proto'] === 'https'
+    
     console.log('Setting cookie for production:', isProd)
     console.log('NODE_ENV:', process.env.NODE_ENV)
     console.log('Request origin:', req.headers.origin)
     console.log('Is cross-origin:', isCrossOrigin)
+    console.log('Is HTTPS:', isHttps)
     
-    res.cookie('token', token, {
+    // For cross-origin requests, always use SameSite=None and Secure=true
+    const cookieOptions = {
       httpOnly: true,
-      sameSite: (isProd || isCrossOrigin) ? 'none' : 'lax',
-      secure: (isProd || isCrossOrigin),
       maxAge: 2 * 60 * 60 * 1000, // 2 hours
       path: '/'
-    })
+    }
+    
+    if (isCrossOrigin || isProd) {
+      cookieOptions.sameSite = 'none'
+      cookieOptions.secure = true
+    } else {
+      cookieOptions.sameSite = 'lax'
+      cookieOptions.secure = false
+    }
+    
+    console.log('Cookie options:', cookieOptions)
+    res.cookie('token', token, cookieOptions)
     
     console.log('Cookie set successfully')
     
@@ -80,12 +93,21 @@ router.post('/login', async (req, res) => {
 router.post('/logout', (req, res) => {
   const isProd = process.env.NODE_ENV === 'production'
   const isCrossOrigin = req.headers.origin && !req.headers.origin.includes('localhost')
-  res.clearCookie('token', { 
-    httpOnly: true, 
-    sameSite: (isProd || isCrossOrigin) ? 'none' : 'lax', 
-    secure: (isProd || isCrossOrigin),
+  
+  const cookieOptions = {
+    httpOnly: true,
     path: '/'
-  })
+  }
+  
+  if (isCrossOrigin || isProd) {
+    cookieOptions.sameSite = 'none'
+    cookieOptions.secure = true
+  } else {
+    cookieOptions.sameSite = 'lax'
+    cookieOptions.secure = false
+  }
+  
+  res.clearCookie('token', cookieOptions)
   res.json({ success: true })
 })
 
@@ -95,12 +117,14 @@ router.get('/me', (req, res) => {
     console.log('Request origin:', req.headers.origin)
     console.log('Request cookies:', req.cookies)
     console.log('Request headers:', req.headers)
+    console.log('Cookie header:', req.headers.cookie)
     
     const token = req.cookies?.token
     console.log('Token from cookies:', token ? 'Present' : 'Missing')
     
     if (!token) {
       console.log('No token found, returning 401')
+      console.log('Available cookies:', Object.keys(req.cookies || {}))
       return res.status(401).json({ error: 'Unauthorized' })
     }
     
