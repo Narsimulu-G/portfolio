@@ -88,10 +88,10 @@ app.use((err, req, res, next) => {
 })
 
 const PORT = process.env.PORT || 4000
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/portfolio'
+const MONGODB_URI = process.env.MONGODB_URI || 'mongodb+srv://badri_portfolio:badri_portfolio@portfolio.gxuxs4v.mongodb.net/portfolio?retryWrites=true&w=majority'
 
 if (!process.env.MONGODB_URI) {
-  console.warn('[WARN] MONGODB_URI not set. Falling back to local: mongodb://127.0.0.1:27017/portfolio')
+  console.warn('[WARN] MONGODB_URI not set. Using Atlas database: mongodb+srv://badri_portfolio:badri_portfolio@portfolio.gxuxs4v.mongodb.net/portfolio')
 }
 
 async function startServerWithDbRetry() {

@@ -23,7 +23,7 @@ export async function connectToDatabase(mongoUri) {
   
   mongoose.set('strictQuery', true)
   
-  // Configure connection options for better reliability
+  // Configure connection options for better reliability with MongoDB Atlas
   const options = {
     serverSelectionTimeoutMS: 30000, // Increase timeout to 30 seconds
     connectTimeoutMS: 30000,
@@ -31,7 +31,9 @@ export async function connectToDatabase(mongoUri) {
     maxPoolSize: 10,
     minPoolSize: 1,
     maxIdleTimeMS: 30000,
-    bufferCommands: false // Disable mongoose buffering
+    bufferCommands: false, // Disable mongoose buffering
+    retryWrites: true,
+    w: 'majority'
   }
   
   try {
