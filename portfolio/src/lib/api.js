@@ -78,9 +78,14 @@ export async function apiFetch(path, options = {}) {
 export function fixImageUrl(url) {
   if (!url) return url
   
-  // Fix localhost URLs
+  // Fix localhost URLs (both http and https)
   if (url.includes('localhost:4000')) {
-    return url.replace('http://localhost:4000', 'https://portfolio-j9s6.onrender.com')
+    return url.replace(/https?:\/\/localhost:4000/, 'https://portfolio-j9s6.onrender.com')
+  }
+  
+  // Fix any localhost URLs
+  if (url.includes('localhost')) {
+    return url.replace(/https?:\/\/localhost(:\d+)?/, 'https://portfolio-j9s6.onrender.com')
   }
   
   // Fix old backend URLs
