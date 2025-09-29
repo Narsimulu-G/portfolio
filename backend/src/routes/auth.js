@@ -54,16 +54,18 @@ router.post('/login', async (req, res) => {
     )
     
     const isProd = process.env.NODE_ENV === 'production'
+    const isCrossOrigin = req.headers.origin && !req.headers.origin.includes('localhost')
     console.log('Setting cookie for production:', isProd)
+    console.log('NODE_ENV:', process.env.NODE_ENV)
     console.log('Request origin:', req.headers.origin)
+    console.log('Is cross-origin:', isCrossOrigin)
     
     res.cookie('token', token, {
       httpOnly: true,
-      sameSite: isProd ? 'none' : 'lax',
-      secure: isProd,
+      sameSite: (isProd || isCrossOrigin) ? 'none' : 'lax',
+      secure: (isProd || isCrossOrigin),
       maxAge: 2 * 60 * 60 * 1000, // 2 hours
-      path: '/',
-      domain: isProd ? '.onrender.com' : undefined // Set domain for production
+      path: '/'
     })
     
     console.log('Cookie set successfully')
@@ -77,10 +79,11 @@ router.post('/login', async (req, res) => {
 
 router.post('/logout', (req, res) => {
   const isProd = process.env.NODE_ENV === 'production'
+  const isCrossOrigin = req.headers.origin && !req.headers.origin.includes('localhost')
   res.clearCookie('token', { 
     httpOnly: true, 
-    sameSite: isProd ? 'none' : 'lax', 
-    secure: isProd,
+    sameSite: (isProd || isCrossOrigin) ? 'none' : 'lax', 
+    secure: (isProd || isCrossOrigin),
     path: '/'
   })
   res.json({ success: true })
@@ -89,6 +92,7 @@ router.post('/logout', (req, res) => {
 router.get('/me', (req, res) => {
   try {
     console.log('Auth /me endpoint called')
+    console.log('Request origin:', req.headers.origin)
     console.log('Request cookies:', req.cookies)
     console.log('Request headers:', req.headers)
     
@@ -105,6 +109,7 @@ router.get('/me', (req, res) => {
     res.json({ user: { sub: payload.sub, email: payload.email } })
   } catch (e) {
     console.error('Auth check error:', e.message)
+    console.error('Error details:', e)
     // For development, allow requests without proper auth
     if (process.env.NODE_ENV !== 'production') {
       console.log('Development mode: allowing request without auth')

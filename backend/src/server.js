@@ -24,6 +24,10 @@ const allowedOrigins = [
   'https://portfolio-backend-4h8x.onrender.com',
   'https://portfolio-g2wj.onrender.com',
   'https://portfolio-pi-peach-84.vercel.app',
+  'https://portfolio-vercel.vercel.app',
+  'https://portfolio.vercel.app',
+  'https://narsimulu-g-portfolio.vercel.app',
+  'https://portfolio-narsimulu-g.vercel.app'
 ]
 
 // Add environment-specific origins
