@@ -23,7 +23,13 @@ services:
       - key: CLOUDINARY_API_SECRET
         sync: false
       - key: CORS_ORIGIN
-        value: https://your-portfolio-domain.vercel.app
+        value: https://portfolio-pi-peach-84.vercel.app
+      - key: API_BASE_URL
+        value: https://portfolio-backend-4h8x.onrender.com
+      - key: DB_RETRY_DELAY_MS
+        value: 5000
+      - key: DB_MAX_RETRIES
+        value: 10
 
 databases:
   - name: portfolio-db

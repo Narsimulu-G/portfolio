@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { apiFetch } from '@/lib/api'
+import { apiFetch, fixImageUrl } from '@/lib/api'
 const demoProjects = [
   {
     title: 'Food Munch',
@@ -67,10 +67,13 @@ function Projects() {
             console.log('liveUrl:', project.liveUrl)
             console.log('demoUrl:', project.demoUrl)
             
+            // Fix image URLs to use production backend
+            const fixedImage = fixImageUrl(project.imageUrl || project.image)
+            
             const mapped = {
               ...project,
               // Prioritize imageUrl over image for consistency
-              image: project.imageUrl || project.image,
+              image: fixedImage,
               // Use technologies if available, fallback to tags
               tags: project.technologies || project.tags || [],
               // Use liveUrl if available, fallback to demoUrl

@@ -23,7 +23,9 @@ export function AuthProvider({ children }) {
 
   const checkAuthStatus = async () => {
     try {
+      console.log('Checking auth status...')
       const response = await apiFetch('/api/auth/me')
+      console.log('Auth check successful:', response)
       setUser(response.user)
       setIsAuthenticated(true)
     } catch (error) {
@@ -38,12 +40,17 @@ export function AuthProvider({ children }) {
   const login = async (email, password) => {
     try {
       console.log('Attempting login for:', email)
-      await apiFetch('/api/auth/login', {
+      const response = await apiFetch('/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password })
       })
-      console.log('Login successful, checking auth status')
+      console.log('Login response:', response)
+      console.log('Login successful, waiting before checking auth status...')
+      
+      // Add a small delay to ensure cookie is set
+      await new Promise(resolve => setTimeout(resolve, 100))
+      
       await checkAuthStatus()
       return { success: true }
     } catch (error) {

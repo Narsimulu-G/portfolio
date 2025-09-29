@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useEffect, useCallback } from 'react'
-import { apiFetch } from '@/lib/api'
+import { apiFetch, fixImageUrl } from '@/lib/api'
 
 const ProfileContext = createContext()
 
@@ -58,6 +58,12 @@ export function ProfileProvider({ children }) {
         const baseUrl = import.meta.env.VITE_API_BASE || 'https://portfolio-backend-4h8x.onrender.com'
         finalProfileData.avatarUrl = `${baseUrl}${finalProfileData.avatarUrl}`
         console.log('Fixed avatarUrl:', finalProfileData.avatarUrl)
+      }
+      
+      // Fix any problematic URLs (localhost, old backend URLs)
+      if (finalProfileData?.avatarUrl) {
+        finalProfileData.avatarUrl = fixImageUrl(finalProfileData.avatarUrl)
+        console.log('Fixed avatarUrl with utility:', finalProfileData.avatarUrl)
       }
       
       setProfile(finalProfileData)

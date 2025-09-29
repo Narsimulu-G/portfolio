@@ -59,7 +59,8 @@ router.post('/login', async (req, res) => {
       sameSite: isProd ? 'none' : 'lax',
       secure: isProd,
       maxAge: 2 * 60 * 60 * 1000, // 2 hours
-      path: '/'
+      path: '/',
+      domain: isProd ? undefined : undefined // Let browser handle domain in production
     })
     
     res.json({ success: true })

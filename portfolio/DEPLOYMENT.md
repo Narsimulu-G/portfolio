@@ -79,5 +79,5 @@ Make sure your backend is deployed on Render with:
 ### Environment Variables Required:
 
 - `VITE_API_BASE`: Your backend API URL
-  - Production: `https://portfolio-g2wj.onrender.com`
+  - Production: `https://portfolio-backend-4h8x.onrender.com`
   - Development: `http://localhost:4000`

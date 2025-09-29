@@ -22,7 +22,7 @@ function getApiBase() {
   }
   
   // Default to production backend
-  return 'https://portfolio-g2wj.onrender.com'
+  return 'https://portfolio-backend-4h8x.onrender.com'
 }
 
 export const API_BASE = getApiBase()
@@ -71,9 +71,17 @@ export async function apiFetch(path, options = {}) {
 // Helper function to fix image URLs
 export function fixImageUrl(url) {
   if (!url) return url
-  if (url.startsWith('http://localhost:4000')) {
-    return url.replace('http://localhost:4000', 'https://portfolio-g2wj.onrender.com')
+  
+  // Fix localhost URLs
+  if (url.includes('localhost:4000')) {
+    return url.replace('http://localhost:4000', 'https://portfolio-backend-4h8x.onrender.com')
   }
+  
+  // Fix old backend URLs
+  if (url.includes('portfolio-g2wj.onrender.com')) {
+    return url.replace('https://portfolio-g2wj.onrender.com', 'https://portfolio-backend-4h8x.onrender.com')
+  }
+  
   return url
 }
 
