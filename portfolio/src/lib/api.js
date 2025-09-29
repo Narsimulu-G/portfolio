@@ -40,6 +40,12 @@ export async function apiFetch(path, options = {}) {
   }
   headers.set('Accept', 'application/json')
   
+  // Add Authorization header as fallback for cross-origin cookie issues
+  const token = localStorage.getItem('authToken')
+  if (token && !headers.has('Authorization')) {
+    headers.set('Authorization', `Bearer ${token}`)
+  }
+  
   // Use cookie-based auth; always send credentials
   const fetchOptions = {
     ...options,

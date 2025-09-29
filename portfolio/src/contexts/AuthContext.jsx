@@ -30,6 +30,8 @@ export function AuthProvider({ children }) {
       setIsAuthenticated(true)
     } catch (error) {
       console.log('Auth check failed:', error.message)
+      // Clear localStorage token if auth fails
+      localStorage.removeItem('authToken')
       setIsAuthenticated(false)
       setUser(null)
     } finally {
@@ -49,6 +51,13 @@ export function AuthProvider({ children }) {
       })
       console.log('Login response:', response)
       console.log('Cookies after login:', document.cookie)
+      
+      // Store token in localStorage as fallback
+      if (response.token) {
+        localStorage.setItem('authToken', response.token)
+        console.log('Token stored in localStorage as fallback')
+      }
+      
       console.log('Login successful, waiting before checking auth status...')
       
       // Add a small delay to ensure cookie is set
@@ -71,6 +80,8 @@ export function AuthProvider({ children }) {
     } catch (error) {
       console.error('Logout error:', error)
     } finally {
+      // Clear localStorage token
+      localStorage.removeItem('authToken')
       setIsAuthenticated(false)
       setUser(null)
     }
