@@ -133,6 +133,8 @@ router.get('/me', (req, res) => {
     console.log('Token from cookies:', cookieToken ? 'Present' : 'Missing')
     console.log('Token from header:', bearerToken ? 'Present' : 'Missing')
     console.log('Final token:', token ? 'Present' : 'Missing')
+    console.log('Authorization header:', authHeader)
+    console.log('Raw cookies:', req.headers.cookie)
     
     if (!token) {
       console.log('No token found, returning 401')

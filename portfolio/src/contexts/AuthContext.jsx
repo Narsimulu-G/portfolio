@@ -24,6 +24,18 @@ export function AuthProvider({ children }) {
   const checkAuthStatus = async () => {
     try {
       console.log('Checking auth status...')
+      
+      // Check if we have a token in localStorage first
+      const storedToken = localStorage.getItem('authToken')
+      if (!storedToken) {
+        console.log('No stored token found, skipping auth check')
+        setIsAuthenticated(false)
+        setUser(null)
+        setLoading(false)
+        return
+      }
+      
+      console.log('Found stored token, checking auth status...')
       const response = await apiFetch('/api/auth/me')
       console.log('Auth check successful:', response)
       setUser(response.user)
