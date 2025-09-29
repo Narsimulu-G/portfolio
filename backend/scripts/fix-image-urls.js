@@ -13,6 +13,7 @@ dotenv.config()
 // Import models
 import Profile from '../src/models/Profile.js'
 import Project from '../src/models/Project.js'
+import About from '../src/models/About.js'
 
 // Available images in uploads directory
 const availableImages = [
@@ -53,8 +54,18 @@ const fallbackImages = {
   project: 'https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?q=80&w=600&h=400&auto=format&fit=crop'
 }
 
-// Better project images from Unsplash
+// Better project images from Cloudinary
 const projectImages = [
+  'https://res.cloudinary.com/dovmtmu7y/image/upload/v1758257912/ecommerce_demo.jpg',
+  'https://res.cloudinary.com/dovmtmu7y/image/upload/v1758257912/portfolio_demo.jpg',
+  'https://res.cloudinary.com/dovmtmu7y/image/upload/v1758257912/weather_demo.jpg',
+  'https://res.cloudinary.com/dovmtmu7y/image/upload/v1758257912/task_demo.jpg',
+  'https://res.cloudinary.com/dovmtmu7y/image/upload/v1758257912/webapp_demo.jpg',
+  'https://res.cloudinary.com/dovmtmu7y/image/upload/v1758257912/mobile_demo.jpg'
+]
+
+// Fallback to Unsplash if Cloudinary images don't exist
+const unsplashImages = [
   'https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?q=80&w=600&h=400&auto=format&fit=crop',
   'https://images.unsplash.com/photo-1460925895917-afdab827c52f?q=80&w=600&h=400&auto=format&fit=crop',
   'https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?q=80&w=600&h=400&auto=format&fit=crop',
@@ -106,11 +117,12 @@ async function fixImageUrls() {
       console.log(`Current imageUrl: ${project.imageUrl}`)
       console.log(`Current image: ${project.image}`)
       
-      // Check if current URLs are broken
+      // Check if current URLs are broken or need Cloudinary update
       const isImageUrlBroken = project.imageUrl && (
         project.imageUrl.includes('localhost:4000') ||
         project.imageUrl.includes('file-1759158253719-752310476.png') ||
         project.imageUrl.includes('portfolio-j9s6.onrender.com/uploads/') ||
+        project.imageUrl.includes('images.unsplash.com') || // Force update Unsplash to Cloudinary
         !project.imageUrl.startsWith('http')
       )
       
@@ -118,17 +130,45 @@ async function fixImageUrls() {
         project.image.includes('localhost:4000') ||
         project.image.includes('file-1759158253719-752310476.png') ||
         project.image.includes('portfolio-j9s6.onrender.com/uploads/') ||
+        project.image.includes('images.unsplash.com') || // Force update Unsplash to Cloudinary
         !project.image.startsWith('http')
       )
       
       if (isImageUrlBroken || isImageBroken) {
-        // Use a random Unsplash image for projects
+        // Use a random Cloudinary image for projects, fallback to Unsplash
         const randomImage = projectImages[Math.floor(Math.random() * projectImages.length)]
         
         project.imageUrl = randomImage
         project.image = randomImage
         await project.save()
         console.log(`✅ Updated to: ${randomImage}`)
+      } else {
+        console.log('✅ No update needed')
+      }
+    }
+
+    // Fix about section images
+    console.log('\n=== Fixing About Section Images ===')
+    const aboutSections = await About.find({})
+    console.log(`Found ${aboutSections.length} about sections`)
+    
+    for (const about of aboutSections) {
+      console.log(`\nAbout: ${about.title}`)
+      console.log(`Current imageUrl: ${about.imageUrl}`)
+      
+      // Check if current URL is broken
+      const isBroken = about.imageUrl && (
+        about.imageUrl.includes('localhost:4000') ||
+        about.imageUrl.includes('file-1759159261469-42238919.jpg') ||
+        about.imageUrl.includes('portfolio-j9s6.onrender.com/uploads/') ||
+        !about.imageUrl.startsWith('http')
+      )
+      
+      if (isBroken) {
+        // Use Cloudinary fallback for about section
+        about.imageUrl = fallbackImages.profile
+        await about.save()
+        console.log(`✅ Updated to: ${fallbackImages.profile}`)
       } else {
         console.log('✅ No update needed')
       }
