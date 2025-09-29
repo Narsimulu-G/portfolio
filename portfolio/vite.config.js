@@ -16,11 +16,21 @@ export default defineConfig({
     sourcemap: false,
   },
   server: {
+    port: 5173,
+    host: true,
     proxy: {
       '/api': {
-        target: 'https://portfolio-g2wj.onrender.com',
+        target: process.env.VITE_API_BASE || 'https://portfolio-g2wj.onrender.com',
         changeOrigin: true,
         secure: true,
+        configure: (proxy, options) => {
+          proxy.on('proxyReq', (proxyReq, req, res) => {
+            // Forward cookies
+            if (req.headers.cookie) {
+              proxyReq.setHeader('Cookie', req.headers.cookie);
+            }
+          });
+        },
       },
     },
   },

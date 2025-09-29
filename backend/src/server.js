@@ -17,9 +17,11 @@ const app = express()
 const allowedOrigins = [
   'http://localhost:3000',
   'http://localhost:5173',
+  'http://127.0.0.1:3000',
+  'http://127.0.0.1:5173',
   'https://portfolio-backend-4h8x.onrender.com',
+  'https://portfolio-g2wj.onrender.com',
   'https://your-portfolio-domain.vercel.app', // Will be updated after Vercel deployment
-  'https://*.vercel.app' // Allow all Vercel preview deployments
 ]
 
 // Add environment-specific origins
@@ -43,12 +45,24 @@ app.use(cors({
       return callback(null, true)
     }
     
+    // Allow localhost with any port in development
+    if (process.env.NODE_ENV !== 'production' && origin && origin.startsWith('http://localhost:')) {
+      return callback(null, true)
+    }
+    
+    // Allow 127.0.0.1 with any port in development
+    if (process.env.NODE_ENV !== 'production' && origin && origin.startsWith('http://127.0.0.1:')) {
+      return callback(null, true)
+    }
+    
     console.log('CORS blocked origin:', origin)
     callback(new Error('Not allowed by CORS'))
   },
   credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'Cookie']
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'Cookie', 'X-Requested-With', 'Accept'],
+  exposedHeaders: ['Set-Cookie'],
+  optionsSuccessStatus: 200
 }))
 app.use(express.json({ limit: '10mb' }))
 app.use(express.urlencoded({ limit: '10mb', extended: true }))

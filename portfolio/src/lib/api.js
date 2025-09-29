@@ -1,13 +1,27 @@
 // Basic API base resolver: prefer Vite env, else production backend
 export const API_BASE = (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_API_BASE)
-  || 'https://portfolio-g2wj.onrender.com'  // Your actual Render backend URL
+  || (typeof window !== 'undefined' && window.location.hostname === 'localhost' ? 'http://localhost:4000' : 'https://portfolio-g2wj.onrender.com')
 
 export async function apiFetch(path, options = {}) {
   const url = `${API_BASE}${path.startsWith('/') ? path : `/${path}`}`
   const headers = new Headers(options.headers || {})
+  
+  // Ensure proper headers for CORS
+  headers.set('Content-Type', 'application/json')
+  headers.set('Accept', 'application/json')
+  
   // Use cookie-based auth; always send credentials
-  const res = await fetch(url, { ...options, headers, credentials: 'include' })
+  const fetchOptions = {
+    ...options,
+    headers,
+    credentials: 'include',
+    mode: 'cors',
+    cache: 'no-cache'
+  }
+  
+  const res = await fetch(url, fetchOptions)
   const data = await res.json().catch(() => ({}))
+  
   if (!res.ok) {
     const message = (data && (data.error || data.message)) || `Request failed: ${res.status}`
     throw new Error(message)
