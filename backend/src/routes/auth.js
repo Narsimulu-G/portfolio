@@ -63,7 +63,7 @@ router.post('/login', async (req, res) => {
       secure: isProd,
       maxAge: 2 * 60 * 60 * 1000, // 2 hours
       path: '/',
-      domain: undefined // Don't set domain to allow cross-origin cookies
+      domain: isProd ? '.onrender.com' : undefined // Set domain for production
     })
     
     console.log('Cookie set successfully')
