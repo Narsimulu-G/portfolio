@@ -34,8 +34,8 @@ export async function apiFetch(path, options = {}) {
   const url = `${API_BASE}${path.startsWith('/') ? path : `/${path}`}`
   const headers = new Headers(options.headers || {})
   
-  // Ensure proper headers for CORS
-  if (!headers.has('Content-Type')) {
+  // Only set Content-Type for non-FormData requests
+  if (!headers.has('Content-Type') && !(options.body instanceof FormData)) {
     headers.set('Content-Type', 'application/json')
   }
   headers.set('Accept', 'application/json')

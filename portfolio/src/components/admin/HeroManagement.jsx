@@ -133,18 +133,14 @@ export default function HeroManagement() {
         type: file.type
       })
       
-      const response = await fetch('/api/upload', {
+      const data = await apiFetch('/api/upload', {
         method: 'POST',
         body: formData
       })
       
-      console.log('Upload response status:', response.status)
-      console.log('Upload response headers:', response.headers)
-      
-      const data = await response.json()
       console.log('Upload response data:', data)
       
-      if (response.ok && data.success) {
+      if (data.success) {
         console.log('Upload successful:', data)
         // Use relative URL for better frontend compatibility
         const imageUrl = data.relativeUrl || data.url

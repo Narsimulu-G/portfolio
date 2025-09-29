@@ -147,21 +147,19 @@ export default function AboutManagement() {
         const formData = new FormData()
         formData.append('file', file)
         
-        const response = await fetch('/api/upload', {
+        const data = await apiFetch('/api/upload', {
           method: 'POST',
           body: formData
         })
         
-        if (response.ok) {
-          const data = await response.json()
+        if (data.success) {
           setAbout(prev => ({
             ...prev,
             imageUrl: data.url
           }))
           alert('Image uploaded successfully!')
         } else {
-          const errorData = await response.json().catch(() => ({}))
-          alert(`Failed to upload image: ${errorData.message || 'Unknown error'}`)
+          alert(`Failed to upload image: ${data.error || 'Unknown error'}`)
         }
       } catch (error) {
         console.error('Upload error:', error)
