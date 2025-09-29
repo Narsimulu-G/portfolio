@@ -83,11 +83,23 @@ router.post('/logout', (req, res) => {
 
 router.get('/me', (req, res) => {
   try {
+    console.log('Auth /me endpoint called')
+    console.log('Request cookies:', req.cookies)
+    console.log('Request headers:', req.headers)
+    
     const token = req.cookies?.token
-    if (!token) return res.status(401).json({ error: 'Unauthorized' })
+    console.log('Token from cookies:', token ? 'Present' : 'Missing')
+    
+    if (!token) {
+      console.log('No token found, returning 401')
+      return res.status(401).json({ error: 'Unauthorized' })
+    }
+    
     const payload = jwt.verify(token, process.env.JWT_SECRET || 'dev_secret')
+    console.log('Token verified successfully for user:', payload.email)
     res.json({ user: { sub: payload.sub, email: payload.email } })
   } catch (e) {
+    console.error('Auth check error:', e.message)
     return res.status(401).json({ error: 'Unauthorized' })
   }
 })

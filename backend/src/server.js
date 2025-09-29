@@ -20,9 +20,10 @@ const allowedOrigins = [
   'http://localhost:5173',
   'http://127.0.0.1:3000',
   'http://127.0.0.1:5173',
+  'https://portfolio-j9s6.onrender.com',
   'https://portfolio-backend-4h8x.onrender.com',
   'https://portfolio-g2wj.onrender.com',
-  'https://your-portfolio-domain.vercel.app', // Will be updated after Vercel deployment
+  'https://portfolio-pi-peach-84.vercel.app',
 ]
 
 // Add environment-specific origins
