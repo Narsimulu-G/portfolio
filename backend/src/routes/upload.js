@@ -55,13 +55,9 @@ try {
   console.error('Cloudinary configuration error:', error)
 }
 
-// Create uploads directory if it doesn't exist (fallback)
-const uploadsDir = path.join(process.cwd(), 'uploads')
-if (!fs.existsSync(uploadsDir)) {
-  fs.mkdirSync(uploadsDir, { recursive: true })
-}
+// Note: Local uploads directory removed - using Cloudinary for all image storage
 
-// Configure multer storage (Cloudinary or local fallback)
+// Configure multer storage (Cloudinary only)
 let storage
 
 // Check if Cloudinary is properly configured
@@ -71,7 +67,7 @@ const isCloudinaryConfigured = process.env.CLOUDINARY_CLOUD_NAME &&
 
 if (isCloudinaryConfigured) {
   try {
-    // Try Cloudinary first with optimized settings
+    // Use Cloudinary with optimized settings
     storage = new CloudinaryStorage({
       cloudinary: cloudinary,
       params: {
@@ -89,32 +85,12 @@ if (isCloudinaryConfigured) {
     })
     console.log('Using Cloudinary storage with optimizations')
   } catch (error) {
-    console.error('Cloudinary storage failed, using local storage:', error)
-    // Fallback to local storage
-    storage = multer.diskStorage({
-      destination: (req, file, cb) => {
-        cb(null, uploadsDir)
-      },
-      filename: (req, file, cb) => {
-        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9)
-        cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname))
-      }
-    })
-    console.log('Using local storage fallback')
+    console.error('Cloudinary storage configuration failed:', error)
+    throw new Error('Cloudinary configuration failed. Please check your environment variables.')
   }
 } else {
-  console.log('Cloudinary not configured, using local storage')
-  // Use local storage directly
-  storage = multer.diskStorage({
-    destination: (req, file, cb) => {
-      cb(null, uploadsDir)
-    },
-    filename: (req, file, cb) => {
-      const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9)
-      cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname))
-    }
-  })
-  console.log('Using local storage (Cloudinary not configured)')
+  console.error('Cloudinary not configured! Please set CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, and CLOUDINARY_API_SECRET environment variables.')
+  throw new Error('Cloudinary is required but not configured. Please set the required environment variables.')
 }
 
 let upload
@@ -184,84 +160,44 @@ router.post('/', upload.single('file'), (req, res) => {
       return res.status(400).json({ error: 'No file uploaded' })
     }
 
-    // Handle both Cloudinary and local storage
+    // Handle Cloudinary upload only
     const fileUrl = req.file.path
     const filename = req.file.filename
     const originalName = req.file.originalname
     const size = req.file.size
     
-    // Check if it's a Cloudinary upload (has public_id) or local upload
-    const isCloudinary = req.file.public_id
+    // All uploads are now Cloudinary uploads
+    console.log('File uploaded successfully to Cloudinary:', {
+      filename: filename,
+      originalName: originalName,
+      size: size,
+      url: fileUrl,
+      cloudinaryId: req.file.public_id,
+      format: req.file.format,
+      width: req.file.width,
+      height: req.file.height
+    })
     
-    if (isCloudinary) {
-      console.log('File uploaded successfully to Cloudinary:', {
-        filename: filename,
-        originalName: originalName,
-        size: size,
-        url: fileUrl,
-        cloudinaryId: req.file.public_id,
-        format: req.file.format,
-        width: req.file.width,
-        height: req.file.height
-      })
-      
-      res.json({ 
-        success: true, 
-        url: fileUrl,
-        relativeUrl: fileUrl, // Cloudinary URLs are already full URLs
-        filename: filename,
-        originalName: originalName,
-        size: size,
-        cloudinaryId: req.file.public_id,
-        format: req.file.format,
-        width: req.file.width,
-        height: req.file.height,
-        provider: 'cloudinary'
-      })
-    } else {
-      // Local storage upload
-      const baseUrl = process.env.API_BASE_URL || (process.env.NODE_ENV === 'production' 
-        ? 'https://portfolio-j9s6.onrender.com' 
-        : `http://localhost:${process.env.PORT || 4000}`)
-      const fullUrl = `${baseUrl}/uploads/${filename}`
-      
-      console.log('File uploaded successfully to local storage:', {
-        filename: filename,
-        originalName: originalName,
-        size: size,
-        url: fullUrl
-      })
-      
-      res.json({ 
-        success: true, 
-        url: fullUrl,
-        relativeUrl: `/uploads/${filename}`,
-        filename: filename,
-        originalName: originalName,
-        size: size,
-        provider: 'local'
-      })
-    }
+    res.json({ 
+      success: true, 
+      url: fileUrl,
+      relativeUrl: fileUrl, // Cloudinary URLs are already full URLs
+      filename: filename,
+      originalName: originalName,
+      size: size,
+      cloudinaryId: req.file.public_id,
+      format: req.file.format,
+      width: req.file.width,
+      height: req.file.height,
+      provider: 'cloudinary'
+    })
   } catch (error) {
     console.error('Upload error:', error)
     res.status(500).json({ error: 'Failed to upload file' })
   }
 })
 
-// Serve uploaded files (fallback for local files)
-router.get('/:filename', (req, res) => {
-  const filename = req.params.filename
-  const filePath = path.join(uploadsDir, filename)
-  
-  // Check if file exists
-  if (!fs.existsSync(filePath)) {
-    return res.status(404).json({ error: 'File not found' })
-  }
-  
-  // Set appropriate headers
-  res.setHeader('Content-Type', 'image/jpeg') // Default to JPEG, could be improved
-  res.sendFile(filePath)
-})
+// Note: Local file serving removed - all files are served via Cloudinary CDN
 
 // Upload with specific type endpoint
 router.post('/:type', upload.single('file'), (req, res) => {
@@ -277,69 +213,40 @@ router.post('/:type', upload.single('file'), (req, res) => {
       return res.status(400).json({ error: 'No file uploaded' })
     }
 
-    // Handle both Cloudinary and local storage
+    // Handle Cloudinary upload only
     const fileUrl = req.file.path
     const filename = req.file.filename
     const originalName = req.file.originalname
     const size = req.file.size
     const uploadType = req.params.type || 'general'
     
-    // Check if it's a Cloudinary upload (has public_id) or local upload
-    const isCloudinary = req.file.public_id
+    // All uploads are now Cloudinary uploads
+    console.log(`File uploaded successfully to Cloudinary (${uploadType}):`, {
+      filename: filename,
+      originalName: originalName,
+      size: size,
+      url: fileUrl,
+      cloudinaryId: req.file.public_id,
+      format: req.file.format,
+      width: req.file.width,
+      height: req.file.height,
+      uploadType: uploadType
+    })
     
-    if (isCloudinary) {
-      console.log(`File uploaded successfully to Cloudinary (${uploadType}):`, {
-        filename: filename,
-        originalName: originalName,
-        size: size,
-        url: fileUrl,
-        cloudinaryId: req.file.public_id,
-        format: req.file.format,
-        width: req.file.width,
-        height: req.file.height,
-        uploadType: uploadType
-      })
-      
-      res.json({ 
-        success: true, 
-        url: fileUrl,
-        relativeUrl: fileUrl, // Cloudinary URLs are already full URLs
-        filename: filename,
-        originalName: originalName,
-        size: size,
-        cloudinaryId: req.file.public_id,
-        format: req.file.format,
-        width: req.file.width,
-        height: req.file.height,
-        provider: 'cloudinary',
-        uploadType: uploadType
-      })
-    } else {
-      // Local storage upload
-      const baseUrl = process.env.API_BASE_URL || (process.env.NODE_ENV === 'production' 
-        ? 'https://portfolio-j9s6.onrender.com' 
-        : `http://localhost:${process.env.PORT || 4000}`)
-      const fullUrl = `${baseUrl}/uploads/${filename}`
-      
-      console.log(`File uploaded successfully to local storage (${uploadType}):`, {
-        filename: filename,
-        originalName: originalName,
-        size: size,
-        url: fullUrl,
-        uploadType: uploadType
-      })
-      
-      res.json({ 
-        success: true, 
-        url: fullUrl,
-        relativeUrl: `/uploads/${filename}`,
-        filename: filename,
-        originalName: originalName,
-        size: size,
-        provider: 'local',
-        uploadType: uploadType
-      })
-    }
+    res.json({ 
+      success: true, 
+      url: fileUrl,
+      relativeUrl: fileUrl, // Cloudinary URLs are already full URLs
+      filename: filename,
+      originalName: originalName,
+      size: size,
+      cloudinaryId: req.file.public_id,
+      format: req.file.format,
+      width: req.file.width,
+      height: req.file.height,
+      provider: 'cloudinary',
+      uploadType: uploadType
+    })
   } catch (error) {
     console.error('Upload error:', error)
     res.status(500).json({ error: 'Failed to upload file' })
@@ -367,8 +274,8 @@ router.get('/health', async (req, res) => {
       status: 'ok', 
       cloudinary: cloudinaryStatus,
       cloudinaryTest: cloudinaryTest,
-      uploads: fs.existsSync(uploadsDir) ? 'available' : 'not available',
-      storage: isCloudinaryConfigured ? 'cloudinary' : 'local',
+      storage: 'cloudinary-only',
+      localUploads: 'disabled',
       timestamp: new Date().toISOString()
     })
   } catch (error) {
@@ -376,7 +283,8 @@ router.get('/health', async (req, res) => {
       status: 'error', 
       error: error.message,
       cloudinary: 'error',
-      uploads: fs.existsSync(uploadsDir) ? 'available' : 'not available'
+      storage: 'cloudinary-only',
+      localUploads: 'disabled'
     })
   }
 })

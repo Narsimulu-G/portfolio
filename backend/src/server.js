@@ -80,8 +80,7 @@ app.use('/api/auth', authRouter)
 app.use('/api/admin', adminRouter)
 app.use('/api/upload', uploadRouter)
 
-// Serve uploaded files statically
-app.use('/uploads', express.static('uploads'))
+// Note: Static file serving for uploads removed - using Cloudinary for all image storage
 
 // Error handler
 // eslint-disable-next-line no-unused-vars
