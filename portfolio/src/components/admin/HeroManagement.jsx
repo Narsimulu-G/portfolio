@@ -27,10 +27,26 @@ export default function HeroManagement() {
 
   const fetchHero = async () => {
     try {
+      console.log('Fetching admin hero data...')
       const data = await apiFetch('/api/admin/profile')
+      console.log('Hero data fetched:', data)
       setHero(data)
     } catch (error) {
       console.error('Failed to fetch hero data:', error)
+      console.log('Error details:', {
+        message: error.message,
+        status: error.status,
+        name: error.name
+      })
+      
+      // Try to provide more specific error messages
+      if (error.message.includes('401') || error.message.includes('403')) {
+        alert('Authentication required. Please log in again.')
+      } else if (error.message.includes('Network error')) {
+        alert('Unable to connect to server. Please check your internet connection.')
+      } else {
+        console.log('Hero fetch failed, continuing with empty data')
+      }
     } finally {
       setLoading(false)
     }
@@ -133,21 +149,17 @@ export default function HeroManagement() {
         type: file.type
       })
       
-      const response = await fetch('/api/upload', {
+      const response = await apiFetch('/api/upload', {
         method: 'POST',
         body: formData
       })
       
-      console.log('Upload response status:', response.status)
-      console.log('Upload response headers:', response.headers)
+      console.log('Upload response:', response)
       
-      const data = await response.json()
-      console.log('Upload response data:', data)
-      
-      if (response.ok && data.success) {
-        console.log('Upload successful:', data)
+      if (response.success) {
+        console.log('Upload successful:', response)
         // Use relative URL for better frontend compatibility
-        const imageUrl = data.relativeUrl || data.url
+        const imageUrl = response.relativeUrl || response.url
         console.log('Setting image URL:', imageUrl)
         setHero(prev => ({
           ...prev,
@@ -155,8 +167,8 @@ export default function HeroManagement() {
         }))
         alert('Image uploaded successfully!')
       } else {
-        console.error('Upload failed:', data)
-        alert(`Failed to upload image: ${data.error || 'Unknown error'}`)
+        console.error('Upload failed:', response)
+        alert(`Failed to upload image: ${response.error || 'Unknown error'}`)
       }
     } catch (error) {
       console.error('Upload error:', error)

@@ -27,7 +27,9 @@ export default function AboutManagement() {
 
   const fetchAbout = async () => {
     try {
+      console.log('Fetching admin about data...')
       const data = await apiFetch('/api/admin/about')
+      console.log('About data fetched:', data)
       setAbout({
         title: data.title || '',
         bio: data.bio || '',
@@ -42,6 +44,20 @@ export default function AboutManagement() {
       })
     } catch (error) {
       console.error('Failed to fetch about data:', error)
+      console.log('Error details:', {
+        message: error.message,
+        status: error.status,
+        name: error.name
+      })
+      
+      // Try to provide more specific error messages
+      if (error.message.includes('401') || error.message.includes('403')) {
+        alert('Authentication required. Please log in again.')
+      } else if (error.message.includes('Network error')) {
+        alert('Unable to connect to server. Please check your internet connection.')
+      } else {
+        console.log('About fetch failed, continuing with empty data')
+      }
     } finally {
       setLoading(false)
     }
@@ -147,21 +163,19 @@ export default function AboutManagement() {
         const formData = new FormData()
         formData.append('file', file)
         
-        const response = await fetch('/api/upload', {
+        const response = await apiFetch('/api/upload', {
           method: 'POST',
           body: formData
         })
         
-        if (response.ok) {
-          const data = await response.json()
+        if (response.success) {
           setAbout(prev => ({
             ...prev,
-            imageUrl: data.url
+            imageUrl: response.url
           }))
           alert('Image uploaded successfully!')
         } else {
-          const errorData = await response.json().catch(() => ({}))
-          alert(`Failed to upload image: ${errorData.message || 'Unknown error'}`)
+          alert(`Failed to upload image: ${response.error || 'Unknown error'}`)
         }
       } catch (error) {
         console.error('Upload error:', error)

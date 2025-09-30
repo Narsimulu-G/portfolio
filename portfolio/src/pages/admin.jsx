@@ -64,9 +64,18 @@ export default function AdminPage() {
 
         let a = null
         try {
+          console.log('Fetching admin about data...')
           a = await apiFetch('/api/admin/about')
-        } catch (_) {
-          a = await apiFetch('/api/about').catch(() => null)
+          console.log('Admin about data fetched:', a)
+        } catch (error) {
+          console.log('Admin about failed, trying public about:', error.message)
+          try {
+            a = await apiFetch('/api/about')
+            console.log('Public about data fetched:', a)
+          } catch (publicError) {
+            console.log('Public about also failed:', publicError.message)
+            a = null
+          }
         }
         if (a) setAbout({ 
           title: a.title || '', 

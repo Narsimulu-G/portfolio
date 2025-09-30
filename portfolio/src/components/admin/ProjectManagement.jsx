@@ -27,6 +27,7 @@ export default function ProjectManagement() {
   const fetchProjects = async () => {
     try {
       setLoading(true)
+      console.log('Fetching admin projects...')
       const data = await apiFetch('/api/admin/projects')
       console.log('Fetched projects:', data)
       console.log('First project fields:', data[0] ? Object.keys(data[0]) : 'No projects')
@@ -35,7 +36,20 @@ export default function ProjectManagement() {
       setProjects(data)
     } catch (error) {
       console.error('Failed to fetch projects:', error)
-      alert('Failed to fetch projects. Please refresh the page.')
+      console.log('Error details:', {
+        message: error.message,
+        status: error.status,
+        name: error.name
+      })
+      
+      // Try to provide more specific error messages
+      if (error.message.includes('401') || error.message.includes('403')) {
+        alert('Authentication required. Please log in again.')
+      } else if (error.message.includes('Network error')) {
+        alert('Unable to connect to server. Please check your internet connection.')
+      } else {
+        alert(`Failed to fetch projects: ${error.message}`)
+      }
     } finally {
       setLoading(false)
     }

@@ -34,8 +34,10 @@ export async function apiFetch(path, options = {}) {
   const url = `${API_BASE}${path.startsWith('/') ? path : `/${path}`}`
   const headers = new Headers(options.headers || {})
   
-  // Ensure proper headers for CORS
-  if (!headers.has('Content-Type')) {
+  // Don't set Content-Type for FormData - let browser set it with boundary
+  const isFormData = options.body instanceof FormData
+  
+  if (!isFormData && !headers.has('Content-Type')) {
     headers.set('Content-Type', 'application/json')
   }
   headers.set('Accept', 'application/json')
@@ -49,7 +51,7 @@ export async function apiFetch(path, options = {}) {
   // Use cookie-based auth; always send credentials
   const fetchOptions = {
     ...options,
-    headers,
+    headers: isFormData ? undefined : headers, // Don't set headers for FormData
     credentials: 'include',
     mode: 'cors',
     cache: 'no-cache'

@@ -150,15 +150,32 @@ router.get('/about', async (req, res, next) => {
     console.log('Admin /about endpoint called')
     console.log('Request origin:', req.headers.origin)
     console.log('Request headers:', req.headers)
+    console.log('User authenticated:', req.user ? 'Yes' : 'No')
+    
     const doc = await About.findOne().sort({ updatedAt: -1 })
-    if (doc) return res.json(doc)
+    console.log('About document found:', doc ? 'Yes' : 'No')
+    
+    if (doc) {
+      console.log('Returning about document from DB')
+      return res.json(doc)
+    }
+    
     // Fallback from seed profile mapping with defaults for lists
-    return res.json({ title: seedProfile.name, bio: seedProfile.bio || seedProfile.headline || '', imageUrl: seedProfile.avatarUrl || '', whatIDo: [
-      'Build responsive web applications using React.js and modern frameworks',
-      'Develop backend APIs and services with Python and Node.js',
-      'Create user-friendly interfaces with HTML, CSS, and Bootstrap',
-      'Work with databases and implement CRUD operations'
-    ], techStacks: ['React.js','JavaScript','HTML','CSS','Bootstrap','Node.js','Express','SQLite'] })
+    console.log('No about document found, returning fallback data')
+    const fallbackData = { 
+      title: seedProfile.name, 
+      bio: seedProfile.bio || seedProfile.headline || '', 
+      imageUrl: seedProfile.avatarUrl || '', 
+      whatIDo: [
+        'Build responsive web applications using React.js and modern frameworks',
+        'Develop backend APIs and services with Python and Node.js',
+        'Create user-friendly interfaces with HTML, CSS, and Bootstrap',
+        'Work with databases and implement CRUD operations'
+      ], 
+      techStacks: ['React.js','JavaScript','HTML','CSS','Bootstrap','Node.js','Express','SQLite'] 
+    }
+    console.log('Fallback data:', fallbackData)
+    return res.json(fallbackData)
   } catch (e) { 
     console.error('Admin /about error:', e)
     next(e) 
