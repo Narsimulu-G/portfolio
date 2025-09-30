@@ -149,7 +149,7 @@ export default function HeroManagement() {
         type: file.type
       })
       
-      const response = await apiFetch('/api/upload', {
+      const response = await apiFetch('/api/upload/avatar', {
         method: 'POST',
         body: formData
       })

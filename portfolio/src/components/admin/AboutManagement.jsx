@@ -163,7 +163,7 @@ export default function AboutManagement() {
         const formData = new FormData()
         formData.append('file', file)
         
-        const response = await apiFetch('/api/upload', {
+        const response = await apiFetch('/api/upload/about', {
           method: 'POST',
           body: formData
         })

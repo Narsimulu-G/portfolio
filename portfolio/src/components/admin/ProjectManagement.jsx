@@ -226,7 +226,7 @@ export default function ProjectManagement() {
       const formData = new FormData()
       formData.append('file', file)
 
-      const response = await apiFetch('/api/upload', {
+      const response = await apiFetch('/api/upload/project', {
         method: 'POST',
         body: formData
       })
