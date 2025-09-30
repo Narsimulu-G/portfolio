@@ -107,7 +107,7 @@ function Hero() {
                 <span className="text-gray-800">
                   {profile?.name?.split(' ')[0] || 'Narsimulu'}
                 </span>
-                <span className="bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent">G.</span>
+                <span className="bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent"> G.</span>
               </h1>
               <p className="mt-4 sm:mt-6 max-w-xl mx-auto lg:mx-0 text-sm sm:text-base text-gray-600 animate-[fadeInDown_.8s_ease-out]">
                 {profile?.bio || 'Full-stack developer passionate about building responsive web applications.'}
