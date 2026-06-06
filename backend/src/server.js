@@ -1,7 +1,7 @@
+import 'dotenv/config'
 import express from 'express'
 import cors from 'cors'
 import morgan from 'morgan'
-import dotenv from 'dotenv'
 import cookieParser from 'cookie-parser'
 import mongoose from 'mongoose'
 import { connectToDatabase } from './config/db.js'
@@ -9,8 +9,6 @@ import apiRouter from './routes/index.js'
 import authRouter from './routes/auth.js'
 import adminRouter from './routes/admin.js'
 import uploadRouter from './routes/upload.js'
-
-dotenv.config()
 
 const app = express()
 

@@ -1,4 +1,5 @@
 import { Router } from 'express'
+import mongoose from 'mongoose'
 import { requireAuth } from '../middleware/auth.js'
 import Message from '../models/Message.js'
 import Project from '../models/Project.js'
@@ -8,7 +9,7 @@ import Certificate from '../models/Certificate.js'
 import Resume from '../models/Resume.js'
 import Contact from '../models/Contact.js'
 import Skill from '../models/Skill.js'
-import { profile as seedProfile } from '../data/seed.js'
+import { profile as seedProfile, skills, certificates } from '../data/seed.js'
 
 const router = Router()
 
@@ -23,8 +24,21 @@ router.options('*', (req, res) => {
 
 router.use(requireAuth)
 
+// Check DB connection for all data-modifying requests
+router.use((req, res, next) => {
+  if (['POST', 'PUT', 'DELETE', 'PATCH'].includes(req.method)) {
+    if (mongoose.connection.readyState !== 1) {
+      return res.status(503).json({ error: 'Database is offline. Saving changes is disabled in offline mode.' })
+    }
+  }
+  next()
+})
+
 router.get('/summary', async (req, res, next) => {
   try {
+    if (mongoose.connection.readyState !== 1) {
+      throw new Error('Database is offline')
+    }
     const [messagesCount, projectsCount, certificatesCount, resumesCount, contactsCount, skillsCount] = await Promise.all([
       Message.countDocuments(),
       Project.countDocuments(),
@@ -34,14 +48,30 @@ router.get('/summary', async (req, res, next) => {
       Skill.countDocuments()
     ])
     res.json({ messagesCount, projectsCount, certificatesCount, resumesCount, contactsCount, skillsCount })
-  } catch (e) { next(e) }
+  } catch (e) {
+    console.warn('Error in admin summary API, using offline summary:', e.message)
+    res.json({
+      messagesCount: 0,
+      projectsCount: 1,
+      certificatesCount: certificates.length,
+      resumesCount: 1,
+      contactsCount: 1,
+      skillsCount: skills.length
+    })
+  }
 })
 
 router.get('/messages', async (req, res, next) => {
   try {
+    if (mongoose.connection.readyState !== 1) {
+      throw new Error('Database is offline')
+    }
     const list = await Message.find().sort({ createdAt: -1 })
     res.json(list)
-  } catch (e) { next(e) }
+  } catch (e) {
+    console.warn('Error in admin messages API, returning empty list:', e.message)
+    res.json([])
+  }
 })
 
 router.put('/messages/:id', async (req, res, next) => {
@@ -61,32 +91,33 @@ router.delete('/messages/:id', async (req, res, next) => {
 })
 
 router.get('/projects', async (req, res, next) => {
+  const fallbackProjects = [
+    {
+      title: 'Food Munch',
+      description: 'Responsive food browsing website with product videos. Built using HTML, CSS, and Bootstrap.',
+      image: 'https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?q=80&w=1200&auto=format&fit=crop',
+      tags: ['HTML', 'CSS', 'Bootstrap'],
+      demoUrl: 'http://narsimulu79.ccbp.tech',
+      githubUrl: 'https://github.com/yourusername/food-munch',
+      icon: '🍕',
+      category: 'Web Development'
+    }
+  ]
   try {
     console.log('=== ADMIN PROJECTS API ===')
+    if (mongoose.connection.readyState !== 1) {
+      throw new Error('Database is offline')
+    }
     const list = await Project.find().sort({ createdAt: -1 })
     console.log('Found projects in DB (admin):', list.length)
-    console.log('Projects data (admin):', list)
-    
     if (!list || list.length === 0) {
       console.log('No projects in DB (admin), returning demo data')
-      return res.json([
-        {
-          title: 'Food Munch',
-          description: 'Responsive food browsing website with product videos. Built using HTML, CSS, and Bootstrap.',
-          image: 'https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?q=80&w=1200&auto=format&fit=crop',
-          tags: ['HTML', 'CSS', 'Bootstrap'],
-          demoUrl: 'http://narsimulu79.ccbp.tech',
-          githubUrl: 'https://github.com/yourusername/food-munch',
-          icon: '🍕',
-          category: 'Web Development'
-        }
-      ])
+      return res.json(fallbackProjects)
     }
-    console.log('Returning projects from DB (admin):', list)
     res.json(list)
-  } catch (e) { 
-    console.error('Error in admin projects API:', e)
-    next(e) 
+  } catch (e) {
+    console.warn('Error in admin projects API, using fallback:', e.message)
+    res.json(fallbackProjects)
   }
 })
 
@@ -113,16 +144,19 @@ router.delete('/projects/:id', async (req, res, next) => {
   } catch (e) { next(e) }
 })
 
-export default router
-
-// Profile (Hero) admin CRUD (upsert single record)
+// Profile (Hero) admin CRUD
 router.get('/profile', async (req, res, next) => {
   try {
+    if (mongoose.connection.readyState !== 1) {
+      throw new Error('Database is offline')
+    }
     const doc = await Profile.findOne().sort({ updatedAt: -1 })
     if (doc) return res.json(doc)
-    // Fallback to seed profile for admin UI defaults
     return res.json(seedProfile)
-  } catch (e) { next(e) }
+  } catch (e) {
+    console.warn('Error in admin profile API, using seedProfile:', e.message)
+    return res.json(seedProfile)
+  }
 })
 
 router.post('/profile', async (req, res, next) => {
@@ -144,41 +178,30 @@ router.put('/profile', async (req, res, next) => {
   } catch (e) { next(e) }
 })
 
-// About admin CRUD (separate from profile/hero)
+// About admin CRUD
 router.get('/about', async (req, res, next) => {
+  const fallbackData = { 
+    title: seedProfile.name, 
+    bio: seedProfile.bio || seedProfile.headline || '', 
+    imageUrl: seedProfile.avatarUrl || '', 
+    whatIDo: [
+      'Build responsive web applications using React.js and modern frameworks',
+      'Develop backend APIs and services with Python and Node.js',
+      'Create user-friendly interfaces with HTML, CSS, and Bootstrap',
+      'Work with databases and implement CRUD operations'
+    ], 
+    techStacks: ['React.js','JavaScript','HTML','CSS','Bootstrap','Node.js','Express','SQLite'] 
+  }
   try {
-    console.log('Admin /about endpoint called')
-    console.log('Request origin:', req.headers.origin)
-    console.log('Request headers:', req.headers)
-    console.log('User authenticated:', req.user ? 'Yes' : 'No')
-    
+    if (mongoose.connection.readyState !== 1) {
+      throw new Error('Database is offline')
+    }
     const doc = await About.findOne().sort({ updatedAt: -1 })
-    console.log('About document found:', doc ? 'Yes' : 'No')
-    
-    if (doc) {
-      console.log('Returning about document from DB')
-      return res.json(doc)
-    }
-    
-    // Fallback from seed profile mapping with defaults for lists
-    console.log('No about document found, returning fallback data')
-    const fallbackData = { 
-      title: seedProfile.name, 
-      bio: seedProfile.bio || seedProfile.headline || '', 
-      imageUrl: seedProfile.avatarUrl || '', 
-      whatIDo: [
-        'Build responsive web applications using React.js and modern frameworks',
-        'Develop backend APIs and services with Python and Node.js',
-        'Create user-friendly interfaces with HTML, CSS, and Bootstrap',
-        'Work with databases and implement CRUD operations'
-      ], 
-      techStacks: ['React.js','JavaScript','HTML','CSS','Bootstrap','Node.js','Express','SQLite'] 
-    }
-    console.log('Fallback data:', fallbackData)
+    if (doc) return res.json(doc)
     return res.json(fallbackData)
-  } catch (e) { 
-    console.error('Admin /about error:', e)
-    next(e) 
+  } catch (e) {
+    console.warn('Error in admin about API, using fallbackData:', e.message)
+    return res.json(fallbackData)
   }
 })
 
@@ -204,9 +227,15 @@ router.put('/about', async (req, res, next) => {
 // Certificate admin CRUD
 router.get('/certificates', async (req, res, next) => {
   try {
+    if (mongoose.connection.readyState !== 1) {
+      throw new Error('Database is offline')
+    }
     const list = await Certificate.find().sort({ order: 1, createdAt: -1 })
     res.json(list)
-  } catch (e) { next(e) }
+  } catch (e) {
+    console.warn('Error in admin certificates API, using seed certificates:', e.message)
+    res.json(certificates)
+  }
 })
 
 router.post('/certificates', async (req, res, next) => {
@@ -234,10 +263,26 @@ router.delete('/certificates/:id', async (req, res, next) => {
 
 // Resume admin CRUD
 router.get('/resumes', async (req, res, next) => {
+  const defaultResume = {
+    title: 'Resume',
+    fileName: 'resume.pdf',
+    fileUrl: '#',
+    fileSize: 0,
+    mimeType: 'application/pdf',
+    isActive: true,
+    downloadCount: 0,
+    message: 'Resume not yet uploaded'
+  }
   try {
+    if (mongoose.connection.readyState !== 1) {
+      throw new Error('Database is offline')
+    }
     const list = await Resume.find().sort({ createdAt: -1 })
     res.json(list)
-  } catch (e) { next(e) }
+  } catch (e) {
+    console.warn('Error in admin resumes API, using defaultResume:', e.message)
+    res.json([defaultResume])
+  }
 })
 
 router.post('/resumes', async (req, res, next) => {
@@ -265,10 +310,31 @@ router.delete('/resumes/:id', async (req, res, next) => {
 
 // Contact admin CRUD
 router.get('/contacts', async (req, res, next) => {
+  const defaultContact = {
+    title: "Get In Touch",
+    subtitle: "Let's work together",
+    description: "I'm always interested in new opportunities and exciting projects. Feel free to reach out!",
+    email: "contact@example.com",
+    phone: "+1 (555) 123-4567",
+    address: "Your City, Country",
+    socialLinks: {
+      linkedin: "https://linkedin.com/in/yourprofile",
+      github: "https://github.com/yourusername",
+      twitter: "https://twitter.com/yourusername",
+      instagram: "",
+      facebook: ""
+    }
+  }
   try {
+    if (mongoose.connection.readyState !== 1) {
+      throw new Error('Database is offline')
+    }
     const list = await Contact.find().sort({ createdAt: -1 })
     res.json(list)
-  } catch (e) { next(e) }
+  } catch (e) {
+    console.warn('Error in admin contacts API, using defaultContact:', e.message)
+    res.json([defaultContact])
+  }
 })
 
 router.post('/contacts', async (req, res, next) => {
@@ -297,9 +363,15 @@ router.delete('/contacts/:id', async (req, res, next) => {
 // Skills admin CRUD
 router.get('/skills', async (req, res, next) => {
   try {
+    if (mongoose.connection.readyState !== 1) {
+      throw new Error('Database is offline')
+    }
     const list = await Skill.find().sort({ order: 1, createdAt: -1 })
     res.json(list)
-  } catch (e) { next(e) }
+  } catch (e) {
+    console.warn('Error in admin skills API, using seed skills:', e.message)
+    res.json(skills)
+  }
 })
 
 router.post('/skills', async (req, res, next) => {
@@ -333,3 +405,5 @@ router.put('/skills/:id/reorder', async (req, res, next) => {
     res.json(updated)
   } catch (e) { next(e) }
 })
+
+export default router
